@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .sun-container {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        margin: -60px auto 0;
+    }
+
+    .sun-btn {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 240px;
+    height: 72px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+}
+
+    .sun-sos {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-radius: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+
+    .sun-btn.btn-outline-primary {
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 600px) {
+        .sun-container {
+            transform: scale(0.75);
+        }
+    }
+</style>
+
+<main class="container text-center mt-3">
+    <h1 class="mb-2">Panel główny</h1>
+    <p class="mb-4">Witaj w aplikacji! Wybierz funkcję:</p>
+
+    <div class="sun-container">
+        <!-- SOS -->
+        <a href="#" class="btn btn-danger sun-sos">SOS</a>
+
+        <a href="{% url 'add_glucose' %}" class="btn btn-outline-primary sun-btn" style="top: 25%; left: 10%;">Pomiary cukru</a>
+        <a href="{% url 'pressure' %}" class="btn btn-outline-primary sun-btn" style="top: 25%; left: 90%;">Pomiary ciśnienia</a>
+        <a href="{% url 'bmi' %}" class="btn btn-outline-primary sun-btn" style="top: 50%; left: 110%;">Wskaźnik BMI</a>
+        <a href="{% url 'clinics' %}" class="btn btn-outline-primary sun-btn" style="top: 75%; left: 90%;">Przychodnie</a>
+        <a href="{% url 'reminders' %}" class="btn btn-outline-primary sun-btn" style="top: 100%; left: 50%;">Przypomnienia</a>
+        <a href="{% url 'medicine' %}" class="btn btn-outline-primary sun-btn" style="top: 75%; left: 10%;">Moja apteczka</a>
+        <a href="{% url 'forums' %}" class="btn btn-outline-primary sun-btn" style="top: 50%; left: -10%;">Fora i poradniki</a>
+    </div>
+</main>
+
+{% endblock %}

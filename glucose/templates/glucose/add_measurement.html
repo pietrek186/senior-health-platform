@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Dodaj pomiar cukru</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="post" class="bg-white p-4 rounded shadow">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-outline-primary">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

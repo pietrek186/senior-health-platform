@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>{% block title %}Zdrowie{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Twój styl -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<!-- Pasek nawigacyjny -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Zdrowie</a>
+
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if user.is_authenticated and request.resolver_match.url_name != "dashboard" and request.resolver_match.url_name != "login" and request.resolver_match.url_name != "register" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">Strona główna</a>
+                </li>
+                {% endif %}
+            </ul>
+
+            {% if user.is_authenticated and request.resolver_match.url_name == "dashboard" %}
+            <!-- Ikony po prawej stronie widoczne tylko po zalogowaniu i tylko na dashboardzie -->
+            <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
+                <li class="nav-item mx-1">
+                    <a class="btn btn-outline-light rounded px-2" href="{% url 'select_results' %}" title="Wyniki pomiarów">
+                        <i class="bi bi-graph-up" style="font-size: 1.2rem;"></i>
+                    </a>
+                </li>
+                <li class="nav-item mx-1">
+                    <a class="btn btn-outline-light rounded px-2" href="{% url 'settings' %}" title="Ustawienia">
+                        <i class="bi bi-gear" style="font-size: 1.2rem;"></i>
+                    </a>
+                </li>
+                <li class="nav-item mx-1">
+                    <a class="btn btn-outline-light rounded px-2" href="{% url 'logout' %}" title="Wyloguj się">
+                        <i class="bi bi-box-arrow-right" style="font-size: 1.2rem;"></i>
+                    </a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<!-- Główna zawartość -->
+<div class="flex-grow-1">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Stopka -->
+<footer class="bg-light text-center text-muted py-3 mt-auto">
+    <small>&copy; 2025 Twoja aplikacja zdrowotna</small>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Automatyczne znikanie alertów po 4 sekundach
+  setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      const bsAlert = new bootstrap.Alert(alert);
+      bsAlert.close();
+    });
+  }, 4000); // 4000 ms = 4 sekundy
+</script>
+</body>
+</html>

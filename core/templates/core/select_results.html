@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2>Wyniki pomiarów</h2>
+    <p>Wybierz kategorię pomiarów do wyświetlenia:</p>
+
+    <div class="d-flex justify-content-center gap-4 mt-4">
+        <a href="{% url 'pressure_results' %}" class="btn btn-outline-primary btn-lg">Wyniki pomiarów ciśnienia</a>
+        <a href="{% url 'glucose_results' %}" class="btn btn-outline-success btn-lg">Wyniki pomiarów cukru</a>
+    </div>
+</div>
+{% endblock %}

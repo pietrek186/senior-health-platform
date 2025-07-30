@@ -1,0 +1,18 @@
+# Środowisko wirtualne
+venv/
+
+# Pliki bazy danych SQLite
+db.sqlite3
+
+# Dane migracji Django (opcjonalnie, jeśli nie chcesz ich trackować)
+*/migrations/__pycache__/
+*/__pycache__/
+
+# Pliki tymczasowe
+*.pyc
+__pycache__/
+
+# Pliki systemowe
+.DS_Store
+*.log
+.env

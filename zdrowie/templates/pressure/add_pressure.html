@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Dodaj pomiar ciśnienia</h2>
+    <div class="card mx-auto p-4" style="max-width: 500px;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.date.label_tag }}
+                {{ form.date }}
+            </div>
+            <div class="mb-3">
+                {{ form.time.label_tag }}
+                {{ form.time }}
+            </div>
+            <div class="mb-3">
+                {{ form.systolic.label_tag }}
+                {{ form.systolic }}
+            </div>
+            <div class="mb-3">
+                {{ form.diastolic.label_tag }}
+                {{ form.diastolic }}
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-outline-primary">Zapisz</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

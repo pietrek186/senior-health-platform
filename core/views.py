@@ -46,9 +46,5 @@ def select_results(request):
     return render(request, 'core/select_results.html')
 
 @login_required
-def glucose_results(request):
-    return render(request, 'glucose/glucose_results.html')  # do stworzenia
-
-@login_required
 def pressure_results(request):
     return render(request, 'pressure/pressure_results.html')  # do stworzenia

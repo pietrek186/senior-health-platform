@@ -1,0 +1,228 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Wyniki pomiarów glukozy{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Wyniki pomiarów glukozy</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <button id="clear-filters" class="btn btn-secondary me-2">Wyczyść filtry</button>
+            <button class="btn btn-dark" id="toggle-filters">Filtruj wyniki</button>
+        </div>
+        <div>
+            <button class="btn btn-dark" id="export-csv">Eksportuj do CSV</button>
+        </div>
+    </div>
+
+    <div id="filter-box" class="card p-3 mb-3" style="display: none;">
+        <strong class="mb-2">Filtruj dane:</strong>
+        <small class="text-muted">Data w formacie <strong>RRRR-MM-DD</strong> (np. 2025-07-30), godzina <strong>GG:MM</strong></small>
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <input type="date" id="min-date" class="form-control" placeholder="Data od">
+            </div>
+            <div class="col-md-4">
+                <input type="date" id="max-date" class="form-control" placeholder="Data do">
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="hour-filter" class="form-control" placeholder="Godzina zawiera (np. 14:00)">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <input type="number" id="min-glucose" class="form-control" placeholder="Poziom glukozy od">
+            </div>
+            <div class="col-md-6">
+                <input type="number" id="max-glucose" class="form-control" placeholder="Poziom glukozy do">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12">
+                <input type="text" id="table-search" class="form-control" placeholder="Szukaj ogólnie...">
+            </div>
+        </div>
+    </div>
+
+    <table id="glucose-table" class="table table-bordered table-striped text-center">
+        <thead class="table-primary">
+            <tr>
+                <th>Data</th>
+                <th>Godzina</th>
+                <th>Poziom glukozy (mg/dL)</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for measurement in measurements %}
+            <tr>
+                <td data-order="{{ measurement.date|date:'Y-m-d' }}T{{ measurement.time|time:'H:i' }}"
+                    data-search="{{ measurement.date|date:'Y-m-d' }}">
+                    {{ measurement.date|date:"j F Y" }}
+                </td>
+                <td>{{ measurement.time|time:"H:i" }}</td>
+                <td>{{ measurement.value }}</td>
+                <td>
+                    <a href="{% url 'edit_glucose' measurement.id %}" class="btn btn-sm btn-outline-primary">Edytuj</a>
+                    <a href="{% url 'delete_glucose' measurement.id %}" class="btn btn-sm btn-outline-danger">Usuń</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-5">
+        <h4 class="text-center mb-3">Wykres poziomu glukozy</h4>
+        <canvas id="glucoseChart"></canvas>
+    </div>
+</div>
+
+<!-- STYLE + SCRIPTY -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const table = $('#glucose-table').DataTable({
+            language: {
+                emptyTable: "Brak danych w tabeli",
+                zeroRecords: "Brak wyników pasujących do filtrów",
+                search: "",
+                lengthMenu: "Pokaż _MENU_ wyników",
+                info: "Wyświetlanie od _START_ do _END_ z _TOTAL_ wyników",
+                paginate: {
+                    previous: "Poprzednia",
+                    next: "Następna"
+                }
+            },
+
+            dom: 'lrtip',
+            pageLength: 10,
+            order: [[0, 'asc'], [1, 'asc']]
+        });
+
+        const ctx = document.getElementById('glucoseChart').getContext('2d');
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Poziom glukozy (mg/dL)',
+                    data: [],
+                    borderColor: 'blue',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: false, title: { display: true, text: 'mg/dL' } },
+                    x: { title: { display: true, text: 'Data i godzina' } }
+                }
+            }
+        });
+
+        function updateChartFromTable() {
+            const labels = [];
+            const data = [];
+            table.rows({ search: 'applied' }).every(function () {
+                const rowNode = this.node();
+                const cells = rowNode.querySelectorAll('td');
+                const date = cells[0]?.textContent.trim();
+                const time = cells[1]?.textContent.trim();
+                const value = parseFloat(cells[2]?.textContent.trim());
+                if (date && time && !isNaN(value)) {
+                    labels.push(date + ' ' + time);
+                    data.push(value);
+                }
+            });
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+
+        updateChartFromTable();
+        table.on('search.dt order.dt page.dt draw.dt', function () {
+            updateChartFromTable();
+        });
+
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            const row = table.row(dataIndex).node();
+            const rowDate = row.querySelector('td').getAttribute('data-order');
+            const rowHour = data[1];
+            const rowValue = parseFloat(data[2]);
+
+            const minDate = $('#min-date').val();
+            const maxDate = $('#max-date').val();
+            const hour = $('#hour-filter').val().trim();
+            const minGlucose = parseFloat($('#min-glucose').val());
+            const maxGlucose = parseFloat($('#max-glucose').val());
+
+            if (minDate && rowDate < minDate) return false;
+            if (maxDate && rowDate > maxDate + 'T23:59') return false;
+            if (hour && !rowHour.includes(hour)) return false;
+            if (!isNaN(minGlucose) && rowValue < minGlucose) return false;
+            if (!isNaN(maxGlucose) && rowValue > maxGlucose) return false;
+
+            return true;
+        });
+
+        $('#min-date, #max-date, #hour-filter, #min-glucose, #max-glucose').on('change keyup', function () {
+            table.draw();
+        });
+
+        $('#clear-filters').on('click', function () {
+            $('#min-date, #max-date, #hour-filter, #min-glucose, #max-glucose, #table-search').val('');
+            table.search('').draw();
+        });
+
+        $('#table-search').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+
+        $('#toggle-filters').on('click', function () {
+            $('#filter-box').slideToggle();
+        });
+
+        $('#export-csv').on('click', function () {
+            const headers = ["Data", "Godzina", "Poziom glukozy (mg/dL)"];
+            const rows = [];
+
+            table.rows({ search: 'applied' }).every(function () {
+                const cells = this.node().querySelectorAll('td');
+                if (cells.length >= 3) {
+                    const row = [
+                        cells[0].textContent.trim(),
+                        cells[1].textContent.trim(),
+                        cells[2].textContent.trim()
+                    ];
+                    rows.push(row);
+                }
+            });
+
+            let csvContent = headers.join(";") + "\n" + rows.map(e => e.join(";")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "pomiar_glukozy.csv");
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    });
+</script>
+
+<style>
+    .btn:hover {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}

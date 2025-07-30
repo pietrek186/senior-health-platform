@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% block title %}Edytuj pomiar{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Edytuj pomiar glukozy</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+        <a href="{% url 'glucose_results' %}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+{% endblock %}

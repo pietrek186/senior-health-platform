@@ -1,0 +1,13 @@
+{% extends 'core/base.html' %}
+{% block title %}Usuń pomiar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2 class="mb-4">Czy na pewno chcesz usunąć ten pomiar?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Tak, usuń</button>
+        <a href="{% url 'glucose_results' %}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+{% endblock %}

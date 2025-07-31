@@ -1,21 +1,21 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Wyniki pomiarów glukozy{% endblock %}
+{% block title %}Wyniki pomiarów ciśnienia{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Wyniki pomiarów glukozy</h2>
+    <h2 class="text-center mb-4">Wyniki pomiarów ciśnienia</h2>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <button id="clear-filters" class="btn btn-secondary me-2">Wyczyść filtry</button>
-            <button class="btn btn-dark" id="toggle-filters">Filtruj wyniki</button>
-        </div>
-        <div>
-            <button class="btn btn-dark" id="export-csv">Eksportuj do CSV</button>
-        </div>
+    <div>
+        <button id="clear-filters" class="btn btn-secondary me-2">Wyczyść filtry</button>
+        <button class="btn btn-dark" id="toggle-filters">Filtruj wyniki</button>
     </div>
+    <div>
+        <button class="btn btn-dark" id="export-csv">Eksportuj do CSV</button>
+    </div>
+</div>
 
     <div id="filter-box" class="card p-3 mb-3" style="display: none;">
         <strong class="mb-2">Filtruj dane:</strong>
@@ -33,10 +33,18 @@
         </div>
         <div class="row mt-2">
             <div class="col-md-6">
-                <input type="number" id="min-glucose" class="form-control" placeholder="Poziom glukozy od">
+                <input type="number" id="min-systolic" class="form-control" placeholder="Ciśnienie skurczowe od">
             </div>
             <div class="col-md-6">
-                <input type="number" id="max-glucose" class="form-control" placeholder="Poziom glukozy do">
+                <input type="number" id="max-systolic" class="form-control" placeholder="Ciśnienie skurczowe do">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <input type="number" id="min-diastolic" class="form-control" placeholder="Ciśnienie rozkurczowe od">
+            </div>
+            <div class="col-md-6">
+                <input type="number" id="max-diastolic" class="form-control" placeholder="Ciśnienie rozkurczowe do">
             </div>
         </div>
         <div class="row mt-2">
@@ -46,12 +54,13 @@
         </div>
     </div>
 
-    <table id="glucose-table" class="table table-bordered table-striped text-center">
+    <table id="pressure-table" class="table table-bordered table-striped text-center">
         <thead class="table-primary">
             <tr>
                 <th>Data</th>
                 <th>Godzina</th>
-                <th>Poziom glukozy (mg/dL)</th>
+                <th>Skurczowe (mmHg)</th>
+                <th>Rozkurczowe (mmHg)</th>
                 <th>Akcje</th>
             </tr>
         </thead>
@@ -63,10 +72,11 @@
                     {{ measurement.date|date:"j F Y" }}
                 </td>
                 <td>{{ measurement.time|time:"H:i" }}</td>
-                <td>{{ measurement.value }}</td>
+                <td>{{ measurement.systolic }}</td>
+                <td>{{ measurement.diastolic }}</td>
                 <td>
-                    <a href="{% url 'edit_glucose' measurement.id %}" class="btn btn-sm btn-outline-primary">Edytuj</a>
-                    <a href="{% url 'delete_glucose' measurement.id %}" class="btn btn-sm btn-outline-danger">Usuń</a>
+                    <a href="{% url 'edit_pressure' measurement.id %}" class="btn btn-sm btn-outline-primary">Edytuj</a>
+                    <a href="{% url 'delete_pressure' measurement.id %}" class="btn btn-sm btn-outline-danger">Usuń</a>
                 </td>
             </tr>
             {% endfor %}
@@ -74,8 +84,8 @@
     </table>
 
     <div class="mt-5">
-        <h4 class="text-center mb-3">Wykres poziomu glukozy</h4>
-        <canvas id="glucoseChart"></canvas>
+        <h4 class="text-center mb-3">Wykres ciśnienia krwi</h4>
+        <canvas id="pressureChart"></canvas>
     </div>
 </div>
 
@@ -88,7 +98,7 @@
 
 <script>
     $(document).ready(function () {
-        const table = $('#glucose-table').DataTable({
+        const table = $('#pressure-table').DataTable({
             language: {
                 emptyTable: "Brak danych w tabeli",
                 zeroRecords: "Brak wyników pasujących do filtrów",
@@ -100,28 +110,35 @@
                     next: "Następna"
                 }
             },
-
             dom: 'lrtip',
             pageLength: 10,
             order: [[0, 'asc'], [1, 'asc']]
         });
 
-        const ctx = document.getElementById('glucoseChart').getContext('2d');
+        const ctx = document.getElementById('pressureChart').getContext('2d');
         let chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{
-                    label: 'Poziom glukozy (mg/dL)',
-                    data: [],
-                    borderColor: 'blue',
-                    tension: 0.1
-                }]
+                datasets: [
+                    {
+                        label: 'Skurczowe (mmHg)',
+                        data: [],
+                        borderColor: 'red',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Rozkurczowe (mmHg)',
+                        data: [],
+                        borderColor: 'blue',
+                        tension: 0.1
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 scales: {
-                    y: { beginAtZero: false, title: { display: true, text: 'mg/dL' } },
+                    y: { beginAtZero: false, title: { display: true, text: 'mmHg' } },
                     x: { title: { display: true, text: 'Data i godzina' } }
                 }
             }
@@ -129,20 +146,27 @@
 
         function updateChartFromTable() {
             const labels = [];
-            const data = [];
+            const systolicData = [];
+            const diastolicData = [];
+
             table.rows({ search: 'applied' }).every(function () {
-                const rowNode = this.node();
-                const cells = rowNode.querySelectorAll('td');
+                const row = this.node();
+                const cells = row.querySelectorAll('td');
                 const date = cells[0]?.textContent.trim();
                 const time = cells[1]?.textContent.trim();
-                const value = parseFloat(cells[2]?.textContent.trim());
-                if (date && time && !isNaN(value)) {
+                const systolic = parseFloat(cells[2]?.textContent.trim());
+                const diastolic = parseFloat(cells[3]?.textContent.trim());
+
+                if (date && time && !isNaN(systolic) && !isNaN(diastolic)) {
                     labels.push(date + ' ' + time);
-                    data.push(value);
+                    systolicData.push(systolic);
+                    diastolicData.push(diastolic);
                 }
             });
+
             chart.data.labels = labels;
-            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].data = systolicData;
+            chart.data.datasets[1].data = diastolicData;
             chart.update();
         }
 
@@ -155,29 +179,34 @@
             const row = table.row(dataIndex).node();
             const rowDate = row.querySelector('td').getAttribute('data-order');
             const rowHour = data[1];
-            const rowValue = parseFloat(data[2]);
+            const systolic = parseFloat(data[2]);
+            const diastolic = parseFloat(data[3]);
 
             const minDate = $('#min-date').val();
             const maxDate = $('#max-date').val();
             const hour = $('#hour-filter').val().trim();
-            const minGlucose = parseFloat($('#min-glucose').val());
-            const maxGlucose = parseFloat($('#max-glucose').val());
+            const minSys = parseFloat($('#min-systolic').val());
+            const maxSys = parseFloat($('#max-systolic').val());
+            const minDia = parseFloat($('#min-diastolic').val());
+            const maxDia = parseFloat($('#max-diastolic').val());
 
             if (minDate && rowDate < minDate) return false;
             if (maxDate && rowDate > maxDate + 'T23:59') return false;
             if (hour && !rowHour.includes(hour)) return false;
-            if (!isNaN(minGlucose) && rowValue < minGlucose) return false;
-            if (!isNaN(maxGlucose) && rowValue > maxGlucose) return false;
+            if (!isNaN(minSys) && systolic < minSys) return false;
+            if (!isNaN(maxSys) && systolic > maxSys) return false;
+            if (!isNaN(minDia) && diastolic < minDia) return false;
+            if (!isNaN(maxDia) && diastolic > maxDia) return false;
 
             return true;
         });
 
-        $('#min-date, #max-date, #hour-filter, #min-glucose, #max-glucose').on('change keyup', function () {
+        $('#min-date, #max-date, #hour-filter, #min-systolic, #max-systolic, #min-diastolic, #max-diastolic').on('change keyup', function () {
             table.draw();
         });
 
         $('#clear-filters').on('click', function () {
-            $('#min-date, #max-date, #hour-filter, #min-glucose, #max-glucose, #table-search').val('');
+            $('#min-date, #max-date, #hour-filter, #min-systolic, #max-systolic, #min-diastolic, #max-diastolic, #table-search').val('');
             table.search('').draw();
         });
 
@@ -190,16 +219,17 @@
         });
 
         $('#export-csv').on('click', function () {
-            const headers = ["Data", "Godzina", "Poziom glukozy (mg/dL)"];
+            const headers = ["Data", "Godzina", "Skurczowe (mmHg)", "Rozkurczowe (mmHg)"];
             const rows = [];
 
             table.rows({ search: 'applied' }).every(function () {
                 const cells = this.node().querySelectorAll('td');
-                if (cells.length >= 3) {
+                if (cells.length >= 4) {
                     const row = [
                         cells[0].textContent.trim(),
                         cells[1].textContent.trim(),
-                        cells[2].textContent.trim()
+                        cells[2].textContent.trim(),
+                        cells[3].textContent.trim()
                     ];
                     rows.push(row);
                 }
@@ -210,7 +240,7 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", "pomiar_glukozy.csv");
+            link.setAttribute("download", "pomiar_cisnienia.csv");
             link.style.display = "none";
             document.body.appendChild(link);
             link.click();
@@ -218,33 +248,4 @@
         });
     });
 </script>
-
-<style>
-    /* Przyciski "Usuń" – czerwony hover */
-    .btn-outline-danger {
-        color: #dc3545;
-        border-color: #dc3545;
-        transition: 0.3s;
-    }
-
-    .btn-outline-danger:hover {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    /* Przyciski "Edytuj" – zostawiamy niebieski */
-    .btn-outline-primary {
-        color: #0d6efd;
-        border-color: #0d6efd;
-        transition: 0.3s;
-    }
-
-    .btn-outline-primary:hover {
-        background-color: #0d6efd;
-        color: white;
-    }
-
-    /* Pozostałe przyciski (Filtruj, Wyczyść itp.) – nie zmieniamy */
-</style>
-
 {% endblock %}

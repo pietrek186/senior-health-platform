@@ -24,15 +24,15 @@
 
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                {% if user.is_authenticated and request.resolver_match.url_name != "dashboard" and request.resolver_match.url_name != "login" and request.resolver_match.url_name != "register" %}
+                {% if user.is_authenticated and request.resolver_match.url_name != "login" and request.resolver_match.url_name != "register" and request.resolver_match.url_name != "dashboard" %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'dashboard' %}">Strona główna</a>
                 </li>
                 {% endif %}
             </ul>
 
-            {% if user.is_authenticated and request.resolver_match.url_name == "dashboard" %}
-            <!-- Ikony po prawej stronie widoczne tylko po zalogowaniu i tylko na dashboardzie -->
+            {% if user.is_authenticated and request.resolver_match.url_name != "login" and request.resolver_match.url_name != "register" %}
+            <!-- Ikony po prawej stronie widoczne po zalogowaniu na każdej stronie oprócz loginu i rejestracji -->
             <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
                 <li class="nav-item mx-1">
                     <a class="btn btn-outline-light rounded px-2" href="{% url 'select_results' %}" title="Wyniki pomiarów">

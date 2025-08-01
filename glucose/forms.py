@@ -6,7 +6,10 @@ class GlucoseMeasurementForm(forms.ModelForm):
         model = GlucoseMeasurement
         fields = ['date', 'time', 'value']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date': forms.DateInput(format='%Y-%m-%d', attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
             'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'value': forms.NumberInput(attrs={'class': 'form-control', 'min': 30, 'max': 600}),
         }

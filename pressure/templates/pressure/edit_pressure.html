@@ -11,6 +11,7 @@
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-dark">Zapisz zmiany</button>
+            <a href="{% url 'pressure_results' %}" class="btn btn-secondary ms-2">Anuluj</a>
         </form>
     </div>
 </div>

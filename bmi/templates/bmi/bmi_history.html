@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Historia pomiarów BMI</h2>
+
+    {% if records %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover text-center align-middle shadow-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Godzina</th>
+                        <th>Wartość BMI</th>
+                        <th>Kategoria</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td>{{ record.created_at|date:"Y-m-d" }}</td>
+                            <td>{{ record.created_at|date:"H:i" }}</td>
+                            <td>{{ record.bmi }}</td>
+                            <td>{{ record.category }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center">Brak zapisanych pomiarów BMI.</p>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{% url 'bmi_form' %}" class="btn btn-outline-primary">Wróć do kalkulatora BMI</a>
+    </div>
+</div>
+{% endblock %}

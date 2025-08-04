@@ -8,7 +8,6 @@ urlpatterns = [
     path('register/', views.register, name='register'),  
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('glucose/', views.placeholder, name='glucose'),
-    path('bmi/', views.placeholder, name='bmi'),
     path('medicine/', views.placeholder, name='medicine'),
     path('reminders/', views.placeholder, name='reminders'),
     path('clinics/', views.placeholder, name='clinics'),

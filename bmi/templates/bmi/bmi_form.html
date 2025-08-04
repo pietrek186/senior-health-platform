@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Oblicz swój wskaźnik BMI</h2>
+
+    <form method="post" class="card p-4 shadow-sm mx-auto" style="max-width: 500px;">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.weight.label_tag }}
+            {{ form.weight }}
+        </div>
+        <div class="mb-3">
+            {{ form.height.label_tag }}
+            {{ form.height }}
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-outline-primary custom-btn">Oblicz BMI</button>
+        </div>
+    </form>
+
+    {% if result %}
+    <div class="card mt-5 p-4 mx-auto shadow-sm text-center" style="max-width: 800px;">
+        <h4 class="mb-3">Twój wynik BMI</h4>
+        <p><strong>BMI:</strong> {{ result.bmi }}</p>
+        <p><strong>Kategoria:</strong> {{ result.category }}</p>
+
+        <!-- Pasek BMI ze znacznikiem -->
+        <div class="bmi-scale mx-auto mt-4">
+            <div class="bmi-bar">
+                <div class="bmi-zone" style="flex: 16; background-color: #d0d0d0;">Wygłodzenie<br><small>< 16</small></div>
+                <div class="bmi-zone" style="flex: 1; background-color: #e0c0c0;">Wychudzenie<br><small>16–17</small></div>
+                <div class="bmi-zone" style="flex: 1.5; background-color: #fdd;">Niedowaga<br><small>17–18,5</small></div>
+                <div class="bmi-zone" style="flex: 6.5; background-color: #cfc;">Masa prawidłowa<br><small>18,5–25</small></div>
+                <div class="bmi-zone" style="flex: 5; background-color: #ffd580;">Nadwaga<br><small>25–30</small></div>
+                <div class="bmi-zone" style="flex: 5; background-color: #ffa07a;">Otyłość I<br><small>30–35</small></div>
+                <div class="bmi-zone" style="flex: 5; background-color: #ff6347;">Otyłość II<br><small>35–40</small></div>
+                <div class="bmi-zone" style="flex: 20; background-color: #ff0000; color: white;">Otyłość III<br><small>> 40</small></div>
+
+                <!-- Znacznik -->
+                <div class="bmi-marker" style="left: {{ result.marker_position }}%;"></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'bmi_history' %}" class="btn btn-outline-primary">Zobacz historię BMI</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .custom-btn {
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .custom-btn:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .bmi-scale {
+        position: relative;
+        width: 100%;
+        max-width: 750px;
+        margin: 0 auto;
+    }
+
+    .bmi-bar {
+        display: flex;
+        height: 50px;
+        border-radius: 8px;
+        overflow: hidden;
+        font-size: 0.75rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .bmi-zone {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        padding: 4px;
+        white-space: nowrap;
+    }
+
+    .bmi-marker {
+        position: absolute;
+        top: -5px;
+        width: 2px;
+        height: 60px;
+        background-color: #000;
+        z-index: 10;
+        transform: translateX(-50%);
+    }
+</style>
+{% endblock %}

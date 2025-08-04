@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "core",
     "glucose",
     "pressure",
+    "bmi",
 ]
 
 MIDDLEWARE = [

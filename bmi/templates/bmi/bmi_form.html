@@ -25,20 +25,33 @@
         <p><strong>BMI:</strong> {{ result.bmi }}</p>
         <p><strong>Kategoria:</strong> {{ result.category }}</p>
 
-        <!-- Pasek BMI ze znacznikiem -->
         <div class="bmi-scale mx-auto mt-4">
-            <div class="bmi-bar">
-                <div class="bmi-zone" style="flex: 16; background-color: #d0d0d0;">Wygłodzenie<br><small>< 16</small></div>
-                <div class="bmi-zone" style="flex: 1; background-color: #e0c0c0;">Wychudzenie<br><small>16–17</small></div>
-                <div class="bmi-zone" style="flex: 1.5; background-color: #fdd;">Niedowaga<br><small>17–18,5</small></div>
-                <div class="bmi-zone" style="flex: 6.5; background-color: #cfc;">Masa prawidłowa<br><small>18,5–25</small></div>
-                <div class="bmi-zone" style="flex: 5; background-color: #ffd580;">Nadwaga<br><small>25–30</small></div>
-                <div class="bmi-zone" style="flex: 5; background-color: #ffa07a;">Otyłość I<br><small>30–35</small></div>
-                <div class="bmi-zone" style="flex: 5; background-color: #ff6347;">Otyłość II<br><small>35–40</small></div>
-                <div class="bmi-zone" style="flex: 20; background-color: #ff0000; color: white;">Otyłość III<br><small>> 40</small></div>
-
-                <!-- Znacznik -->
-                <div class="bmi-marker" style="left: {{ result.marker_position }}%;"></div>
+            <div class="bmi-bar" id="bmi-bar">
+                <div class="bmi-zone" data-min="0" data-max="15.99" style="flex-grow: 16; background-color: #d0d0d0;">
+                    Wygłodzenie<br><small>0–15,9</small>
+                </div>
+                <div class="bmi-zone" data-min="16.0" data-max="16.99" style="flex-grow: 1; background-color: #e0c0c0;">
+                    Wychudzenie<br><small>16–16,9</small>
+                </div>
+                <div class="bmi-zone" data-min="17.0" data-max="18.49" style="flex-grow: 1.5; background-color: #fdd;">
+                    Niedowaga<br><small>17–18,4</small>
+                </div>
+                <div class="bmi-zone" data-min="18.5" data-max="24.99" style="flex-grow: 6.5; background-color: #cfc;">
+                    Masa prawidłowa<br><small>18,5–24,9</small>
+                </div>
+                <div class="bmi-zone" data-min="25.0" data-max="29.99" style="flex-grow: 5; background-color: #ffd580;">
+                    Nadwaga<br><small>25–29,9</small>
+                </div>
+                <div class="bmi-zone" data-min="30.0" data-max="34.99" style="flex-grow: 5; background-color: #ffa07a;">
+                    Otyłość I<br><small>30–34,9</small>
+                </div>
+                <div class="bmi-zone" data-min="35.0" data-max="39.99" style="flex-grow: 5; background-color: #ff6347;">
+                    Otyłość II<br><small>35–39,9</small>
+                </div>
+                <div class="bmi-zone" data-min="40.0" data-max="50.0" style="flex-grow: 10; background-color: #ff0000; color: white;">
+                    Otyłość III<br><small>≥ 40</small>
+                </div>
+                <div class="bmi-marker" id="bmi-marker"></div>
             </div>
         </div>
 
@@ -96,4 +109,37 @@
         transform: translateX(-50%);
     }
 </style>
+
+{% if result %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const bmi = parseFloat("{{ result.bmi|floatformat:1 }}".replace(",", "."));
+    const bar = document.getElementById("bmi-bar");
+    const marker = document.getElementById("bmi-marker");
+    const zones = bar.querySelectorAll(".bmi-zone");
+
+    let barWidth = bar.clientWidth;
+    let currentLeft = 0;
+    let found = false;
+
+    zones.forEach(zone => {
+        if (found) return;
+
+        const min = parseFloat(zone.dataset.min);
+        const max = parseFloat(zone.dataset.max);
+
+        const zoneWidth = zone.clientWidth;
+
+        if (bmi >= min && bmi <= max) {
+            const ratio = (bmi - min) / (max - min);
+            const position = currentLeft + ratio * zoneWidth;
+            marker.style.left = `${position}px`;
+            found = true;
+        } else {
+            currentLeft += zoneWidth;
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

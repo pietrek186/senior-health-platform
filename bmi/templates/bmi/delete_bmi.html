@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h3 class="mb-4">Czy na pewno chcesz usunąć ten pomiar?</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Tak, usuń</button>
+        <a href="{% url 'bmi_history' %}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+{% endblock %}

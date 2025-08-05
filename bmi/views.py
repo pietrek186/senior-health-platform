@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from .forms import BMIForm
 from .models import BMIRecord
 from django.contrib.auth.decorators import login_required
@@ -15,35 +16,33 @@ def get_bmi_category(bmi):
     elif bmi < 30.0:
         return "Nadwaga"
     elif bmi < 35.0:
-        return "Otyłość I"
+        return "Otyłość I stopnia"
     elif bmi < 40.0:
-        return "Otyłość II"
+        return "Otyłość II stopnia"
     else:
-        return "Otyłość III"
+        return "Otyłość III stopnia"
 
 BMI_ZONES = [
-    {"name": "Wygłodzenie", "min": 0, "max": 16, "width": 16},
-    {"name": "Wychudzenie", "min": 16, "max": 17, "width": 1},
-    {"name": "Niedowaga", "min": 17, "max": 18.5, "width": 1.5},
-    {"name": "Masa prawidłowa", "min": 18.5, "max": 25, "width": 6.5},
-    {"name": "Nadwaga", "min": 25, "max": 30, "width": 5},
-    {"name": "Otyłość I", "min": 30, "max": 35, "width": 5},
-    {"name": "Otyłość II", "min": 35, "max": 40, "width": 5},
-    {"name": "Otyłość III", "min": 40, "max": 50, "width": 10},
+    {"name": "Wygłodzenie", "min": 0, "max": 15.99, "width": 16},
+    {"name": "Wychudzenie", "min": 16.0, "max": 16.99, "width": 1},
+    {"name": "Niedowaga", "min": 17.0, "max": 18.49, "width": 1.5},
+    {"name": "Masa prawidłowa", "min": 18.5, "max": 24.99, "width": 6.5},
+    {"name": "Nadwaga", "min": 25.0, "max": 29.99, "width": 5},
+    {"name": "Otyłość I stopnia", "min": 30.0, "max": 34.99, "width": 5},
+    {"name": "Otyłość II stopnia", "min": 35.0, "max": 39.99, "width": 5},
+    {"name": "Otyłość III stopnia", "min": 40.0, "max": 50.0, "width": 10},
 ]
 
 def calculate_marker_position(bmi):
     total_width = sum(zone["width"] for zone in BMI_ZONES)
     current_pos = 0
-
     for zone in BMI_ZONES:
-        if zone["min"] <= bmi < zone["max"]:
+        if zone["min"] <= bmi <= zone["max"]:
             local_ratio = (bmi - zone["min"]) / (zone["max"] - zone["min"])
             local_pos = local_ratio * zone["width"]
             position_percent = ((current_pos + local_pos) / total_width) * 100
             return round(position_percent, 1)
         current_pos += zone["width"]
-
     return 100.0
 
 @login_required
@@ -71,7 +70,7 @@ def bmi_view(request):
                 'result': {
                     'bmi': bmi,
                     'category': category,
-                    'marker_position': f"{marker_position:.1f}".replace(',', '.')  # <<< najważniejsza zmiana
+                    'marker_position': f"{marker_position:.1f}".replace(',', '.')
                 }
             }
             return render(request, 'bmi/bmi_form.html', context)
@@ -82,5 +81,30 @@ def bmi_view(request):
 
 @login_required
 def bmi_history(request):
-    records = BMIRecord.objects.filter(user=request.user).order_by('-created_at')
+    records = BMIRecord.objects.filter(user=request.user).order_by('created_at')
+
+    # Mapujemy kategorie na klasy CSS
+    category_classes = {
+        'Wygłodzenie': 'wyglodzenie',
+        'Wychudzenie': 'wychudzenie',
+        'Niedowaga': 'niedowaga',
+        'Masa prawidłowa': 'masa-prawidlowa',
+        'Nadwaga': 'nadwaga',
+        'Otyłość I stopnia': 'otylosc-i-stopnia',
+        'Otyłość II stopnia': 'otylosc-ii-stopnia',
+        'Otyłość III stopnia': 'otylosc-iii-stopnia',
+    }
+
+    for record in records:
+        record.css_class = category_classes.get(record.category, '')
+
     return render(request, 'bmi/bmi_history.html', {'records': records})
+
+@login_required
+def delete_bmi_record(request, record_id):
+    record = get_object_or_404(BMIRecord, id=record_id, user=request.user)
+    if request.method == 'POST':
+        record.delete()
+        messages.success(request, "Rekord BMI został usunięty.")
+        return redirect('bmi_history')
+    return render(request, 'bmi/delete_bmi.html', {'record': record})

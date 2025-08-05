@@ -1,38 +1,251 @@
 {% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Historia BMI{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Historia pomiarów BMI</h2>
 
-    {% if records %}
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover text-center align-middle shadow-sm">
-                <thead class="table-light">
-                    <tr>
-                        <th>Data</th>
-                        <th>Godzina</th>
-                        <th>Wartość BMI</th>
-                        <th>Kategoria</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in records %}
-                        <tr>
-                            <td>{{ record.created_at|date:"Y-m-d" }}</td>
-                            <td>{{ record.created_at|date:"H:i" }}</td>
-                            <td>{{ record.bmi }}</td>
-                            <td>{{ record.category }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <button id="clear-filters" class="btn btn-secondary me-2">Wyczyść filtry</button>
+            <button class="btn btn-dark" id="toggle-filters">Filtruj wyniki</button>
         </div>
-    {% else %}
-        <p class="text-center">Brak zapisanych pomiarów BMI.</p>
-    {% endif %}
+        <div>
+            <button class="btn btn-dark" id="export-csv">Eksportuj do CSV</button>
+        </div>
+    </div>
 
-    <div class="text-center mt-4">
+    <div id="filter-box" class="card p-3 mb-3" style="display: none;">
+        <strong class="mb-2">Filtruj dane:</strong>
+        <small class="text-muted">W wyszukiwaniu ogólnym data powinna być w formacie <strong>RRRR-MM-DD</strong>, godzina <strong>GG:MM</strong></small>
+
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <input type="date" id="min-date" class="form-control" placeholder="Data od">
+            </div>
+            <div class="col-md-4">
+                <input type="date" id="max-date" class="form-control" placeholder="Data do">
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="hour-filter" class="form-control" placeholder="Godzina zawiera (np. 14:00)">
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <input type="number" id="min-weight" class="form-control" placeholder="Masa od (kg)">
+            </div>
+            <div class="col-md-4">
+                <input type="number" id="max-weight" class="form-control" placeholder="Masa do (kg)">
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <select id="category-filter" class="form-select">
+                    <option value="">Wszystkie kategorie</option>
+                    <option value="Wygłodzenie">Wygłodzenie</option>
+                    <option value="Wychudzenie">Wychudzenie</option>
+                    <option value="Niedowaga">Niedowaga</option>
+                    <option value="Masa prawidłowa">Masa prawidłowa</option>
+                    <option value="Nadwaga">Nadwaga</option>
+                    <option value="Otyłość I">Otyłość I</option>
+                    <option value="Otyłość II">Otyłość II</option>
+                    <option value="Otyłość III">Otyłość III</option>
+                </select>
+                <input type="text" id="table-search" class="form-control" placeholder="Szukaj ogólnie...">
+            </div>
+        </div>
+    </div>
+
+    <table id="bmi-table" class="table table-bordered text-center">
+        <thead class="table-primary">
+            <tr>
+                <th>Data</th>
+                <th>Godzina</th>
+                <th>Wzrost (cm)</th>
+                <th>Masa (kg)</th>
+                <th>BMI</th>
+                <th>Kategoria</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            {% with record.category|slugify as slug %}
+            <tr>
+                <td data-order="{{ record.created_at|date:'Y-m-d' }}T{{ record.created_at|time:'H:i' }}"
+                    data-search="{{ record.created_at|date:'Y-m-d' }}">
+                    {{ record.created_at|date:"j F Y" }}
+                </td>
+                <td>{{ record.created_at|time:"H:i" }}</td>
+                <td>{{ record.height|floatformat:0 }}</td>
+                <td>{{ record.weight|floatformat:1 }}</td>
+                <td>{{ record.bmi|floatformat:1 }}</td>
+                <td class="bmi-category category-{{ record.css_class }}">{{ record.category }}</td>
+                <td>
+                    <a href="{% url 'delete_bmi_record' record.id %}" class="btn btn-sm btn-outline-danger">Usuń</a>
+                </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-center mt-4 mb-5">
         <a href="{% url 'bmi_form' %}" class="btn btn-outline-primary">Wróć do kalkulatora BMI</a>
     </div>
 </div>
+
+<!-- STYLE + SCRIPTY -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const table = $('#bmi-table').DataTable({
+            language: {
+                emptyTable: "Brak danych w tabeli",
+                zeroRecords: "Brak wyników pasujących do filtrów",
+                search: "",
+                lengthMenu: "Pokaż _MENU_ wyników",
+                info: "Wyświetlanie od _START_ do _END_ z _TOTAL_ wyników",
+                paginate: {
+                    previous: "Poprzednia",
+                    next: "Następna"
+                }
+            },
+            dom: 'lrtip',
+            pageLength: 10,
+            order: [[0, 'asc'], [1, 'asc']]
+        });
+
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            const row = table.row(dataIndex).node();
+            const rowDate = row.querySelector('td')?.getAttribute('data-order');
+            const rowHour = data[1];
+            const rowWeight = parseFloat(data[3]);
+            const rowCategory = row.querySelector('.bmi-category')?.textContent?.trim();
+
+            const minDate = $('#min-date').val();
+            const maxDate = $('#max-date').val();
+            const hour = $('#hour-filter').val().trim();
+            const minWeight = parseFloat($('#min-weight').val());
+            const maxWeight = parseFloat($('#max-weight').val());
+            const selectedCategory = $('#category-filter').val().trim();
+
+            const categoryMap = {
+                "Otyłość I": "Otyłość I stopnia",
+                "Otyłość II": "Otyłość II stopnia",
+                "Otyłość III": "Otyłość III stopnia"
+            };
+            const normalizedCategory = categoryMap[selectedCategory] || selectedCategory;
+
+            if (minDate && rowDate < minDate) return false;
+            if (maxDate && rowDate > maxDate + 'T23:59') return false;
+            if (hour && !rowHour.includes(hour)) return false;
+            if (!isNaN(minWeight) && rowWeight < minWeight) return false;
+            if (!isNaN(maxWeight) && rowWeight > maxWeight) return false;
+            if (selectedCategory && rowCategory !== normalizedCategory) return false;
+
+            return true;
+        });
+
+        $('#min-date, #max-date, #hour-filter, #min-weight, #max-weight, #category-filter').on('change keyup', function () {
+            table.draw();
+        });
+
+        $('#clear-filters').on('click', function () {
+            $('#min-date, #max-date, #hour-filter, #min-weight, #max-weight, #table-search, #category-filter').val('');
+            table.search('').draw();
+        });
+
+        $('#table-search').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+
+        $('#toggle-filters').on('click', function () {
+            $('#filter-box').slideToggle();
+        });
+
+        $('#export-csv').on('click', function () {
+            const headers = ["Data", "Godzina", "Wzrost (cm)", "Masa (kg)", "BMI", "Kategoria"];
+            const rows = [];
+
+            table.rows({ search: 'applied' }).every(function () {
+                const cells = this.node().querySelectorAll('td');
+                if (cells.length >= 6) {
+                    const row = [
+                        cells[0].textContent.trim(),
+                        cells[1].textContent.trim(),
+                        cells[2].textContent.trim(),
+                        cells[3].textContent.trim(),
+                        cells[4].textContent.trim(),
+                        cells[5].textContent.trim()
+                    ];
+                    rows.push(row);
+                }
+            });
+
+            let csvContent = headers.join(";") + "\n" + rows.map(e => e.join(";")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "bmi_pomiary.csv");
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    });
+</script>
+
+<style>
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+        transition: 0.3s;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .bmi-category.category-wyglodzenie {
+        background-color: #d0d0d0 !important;
+    }
+
+    .bmi-category.category-wychudzenie {
+        background-color: #e0c0c0 !important;
+    }
+
+    .bmi-category.category-niedowaga {
+        background-color: #fdd !important;
+    }
+
+    .bmi-category.category-masa-prawidlowa {
+        background-color: #cfc !important;
+    }
+
+    .bmi-category.category-nadwaga {
+        background-color: #ffd580 !important;
+    }
+
+    .bmi-category.category-otylosc-i-stopnia {
+        background-color: #ffa07a !important;
+    }
+
+    .bmi-category.category-otylosc-ii-stopnia {
+        background-color: #ff6347 !important;
+        color: white !important;
+    }
+
+    .bmi-category.category-otylosc-iii-stopnia {
+        background-color: #ff0000 !important;
+        color: white !important;
+    }
+</style>
 {% endblock %}

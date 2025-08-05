@@ -65,12 +65,40 @@ def bmi_view(request):
                 category=category
             )
 
+            # Notatki i alerty dopasowane do kategorii
+            notes = {
+                "Wygłodzenie": "Twoja masa ciała jest skrajnie niska, co może wskazywać na poważne niedożywienie. Skontaktuj się z lekarzem, aby ustalić przyczynę i wdrożyć leczenie.",
+                "Wychudzenie": "Twoja masa ciała jest zbyt niska. Może to prowadzić do osłabienia odporności i zaburzeń hormonalnych. Warto skonsultować się z dietetykiem lub lekarzem.",
+                "Niedowaga": "Twoja masa ciała jest poniżej normy. Zadbaj o odpowiednią dietę i skonsultuj się z lekarzem, aby zapobiec ewentualnym problemom zdrowotnym.",
+                "Masa prawidłowa": "Twoja masa ciała jest w normie. Gratulacje! Utrzymuj zdrowy styl życia i regularną aktywność fizyczną.",
+                "Nadwaga": "Masz lekką nadwagę. Warto zadbać o zbilansowaną dietę i codzienną aktywność, aby uniknąć rozwoju otyłości.",
+                "Otyłość I stopnia": "Masa ciała jest zbyt wysoka. Warto skonsultować się z lekarzem, który zaproponuje zmiany w stylu życia, by uniknąć powikłań zdrowotnych.",
+                "Otyłość II stopnia": "BMI wskazuje na otyłość II stopnia. To poważny czynnik ryzyka chorób serca, cukrzycy i nadciśnienia. Skontaktuj się z lekarzem.",
+                "Otyłość III stopnia": "BMI wskazuje na otyłość III stopnia (tzw. otyłość olbrzymia). Wymagana jest pilna konsultacja medyczna i wsparcie specjalisty.",
+            }
+
+            alert_classes = {
+                "Wygłodzenie": "danger",
+                "Wychudzenie": "warning",
+                "Niedowaga": "warning",
+                "Masa prawidłowa": "success",
+                "Nadwaga": "warning",
+                "Otyłość I stopnia": "danger",
+                "Otyłość II stopnia": "danger",
+                "Otyłość III stopnia": "danger",
+            }
+
+            note = notes.get(category, "")
+            alert_class = alert_classes.get(category, "info")
+
             context = {
                 'form': form,
                 'result': {
                     'bmi': bmi,
                     'category': category,
-                    'marker_position': f"{marker_position:.1f}".replace(',', '.')
+                    'marker_position': f"{marker_position:.1f}".replace(',', '.'),
+                    'note': note,
+                    'alert_class': alert_class
                 }
             }
             return render(request, 'bmi/bmi_form.html', context)
@@ -81,7 +109,7 @@ def bmi_view(request):
 
 @login_required
 def bmi_history(request):
-    records = BMIRecord.objects.filter(user=request.user).order_by('created_at')
+    records = BMIRecord.objects.filter(user=request.user).order_by('-created_at')
 
     # Mapujemy kategorie na klasy CSS
     category_classes = {

@@ -25,7 +25,14 @@
         <p><strong>BMI:</strong> {{ result.bmi }}</p>
         <p><strong>Kategoria:</strong> {{ result.category }}</p>
 
-        <div class="bmi-scale mx-auto mt-4">
+        {% if result.note %}
+        <div id="bmi-note" class="alert alert-{{ result.alert_class }} alert-dismissible fade show mt-3" role="alert">
+            {{ result.note }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+        </div>
+        {% endif %}
+
+        <div class="bmi-scale mx-auto mt-4" id="bmi-scale">
             <div class="bmi-bar" id="bmi-bar">
                 <div class="bmi-zone" data-min="0" data-max="15.99" style="flex-grow: 16; background-color: #d0d0d0;">
                     Wygłodzenie<br><small>0–15,9</small>
@@ -77,6 +84,7 @@
         width: 100%;
         max-width: 750px;
         margin: 0 auto;
+        height: 70px;
     }
 
     .bmi-bar {
@@ -118,7 +126,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const marker = document.getElementById("bmi-marker");
     const zones = bar.querySelectorAll(".bmi-zone");
 
-    let barWidth = bar.clientWidth;
     let currentLeft = 0;
     let found = false;
 
@@ -127,7 +134,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const min = parseFloat(zone.dataset.min);
         const max = parseFloat(zone.dataset.max);
-
         const zoneWidth = zone.clientWidth;
 
         if (bmi >= min && bmi <= max) {

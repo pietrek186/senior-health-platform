@@ -1,0 +1,132 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Moja apteczka</h2>
+
+    <!-- Dodaj nowy lek pod tytułem -->
+    <div class="text-center mb-3">
+        <a href="{% url 'add_medication' %}" class="btn btn-primary">Dodaj nowy lek</a>
+    </div>
+
+    {% if medications %}
+    <!-- Sterowanie filtrami i eksportem -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <button id="clear-filters" class="btn btn-secondary me-2">Wyczyść filtry</button>
+            <button id="toggle-filters" class="btn btn-dark">Filtruj wyniki</button>
+        </div>
+        <form action="{% url 'export_medications_csv' %}" method="get">
+            <button type="submit" class="btn btn-dark">Eksportuj do CSV</button>
+        </form>
+    </div>
+
+    <!-- Panel filtrów -->
+    <div id="filter-box" class="card p-3 mb-4" style="display:none;">
+        <strong>Filtruj dane:</strong>
+        <div class="row mt-2">
+            <div class="col-md-8 mb-2">
+                <input type="text" id="filter-name" class="form-control" placeholder="Szukaj po nazwie...">
+            </div>
+            <div class="col-md-4 mb-2 d-flex align-items-center">
+                <div class="form-check form-switch ms-3">
+                    <input class="form-check-input" type="checkbox" id="filter-prescription">
+                    <label class="form-check-label" for="filter-prescription">Tylko na receptę</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela leków -->
+    <div class="table-responsive">
+        <table id="medications-table" class="table table-bordered table-hover align-middle bg-white shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Ilość</th>
+                    <th>Częstotliwość</th>
+                    <th>Data ważności</th>
+                    <th>Recepta</th>
+                    <th>Status</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for med in medications %}
+                <tr>
+                    <td>
+                        {{ med.name }}
+                        {% if med.is_running_low %}
+                            <i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+                               title="Lek kończy się w ciągu 3 dni"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ med.quantity }}</td>
+                    <td>{{ med.frequency }}× dziennie</td>
+                    <td data-order="{{ med.expiration_date }}">{{ med.expiration_date }}</td>
+                    <td>{% if med.prescription_required %}Tak{% else %}Nie{% endif %}</td>
+                    <td>
+                        {% if med.is_running_low %}
+                            <span class="text-danger fw-bold">Kończy się</span>
+                        {% else %}
+                            <span class="text-success">OK</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_medication' med.id %}"
+                           class="btn btn-sm btn-outline-primary me-2">Edytuj</a>
+                        <a href="{% url 'delete_medication' med.pk %}"
+                           class="btn btn-sm btn-outline-danger">Usuń</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-center text-muted">Nie dodano jeszcze żadnych leków.</p>
+    {% endif %}
+</div>
+
+<!-- DataTables + Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<!-- jQuery + DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(function() {
+    const table = $('#medications-table').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pl.json' },
+        dom: 'lrtip',
+        order: [],       // <-- usuwamy domyślne sortowanie
+        pageLength: 10
+    });
+
+    $('#toggle-filters').click(() => $('#filter-box').slideToggle());
+    $('#filter-name, #filter-prescription').on('input change', () => table.draw());
+    $('#clear-filters').click(() => {
+        $('#filter-name').val('');
+        $('#filter-prescription').prop('checked', false);
+        table.search('').draw();
+    });
+
+    $.fn.dataTable.ext.search.push((settings, data) => {
+        const name    = $('#filter-name').val().toLowerCase();
+        const pres    = $('#filter-prescription').is(':checked');
+        const rowName = data[0].toLowerCase();
+        const rowPres = data[4].trim() === 'Tak';
+        if (name && !rowName.includes(name)) return false;
+        if (pres && !rowPres) return false;
+        return true;
+    });
+});
+</script>
+
+<style>
+.btn-outline-primary:hover { background-color: #0d6efd; color: #fff; }
+.btn-outline-danger:hover  { background-color: #dc3545; color: #fff; }
+</style>
+{% endblock %}

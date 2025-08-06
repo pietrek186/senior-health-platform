@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h3 class="mb-4">Czy na pewno chcesz usunąć lek <strong>{{ medication.name }}</strong>?</h3>
+    <form method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger me-2">Tak, usuń</button>
+        <a href="{% url 'medication_list' %}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+{% endblock %}

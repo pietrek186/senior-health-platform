@@ -7,4 +7,5 @@ urlpatterns = [
     path('edit/<int:pk>/', views.edit_medication, name='edit_medication'),
     path('delete/<int:pk>/', views.delete_medication, name='delete_medication'),
     path('export/csv/', views.export_medications_csv, name='export_medications_csv'),
+    path('test-powiadomienia/', views.test_notifications, name='test_notifications'),
 ]

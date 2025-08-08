@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.shortcuts import render
+from django.urls import path
+from .views import test_email  # dopasuj ścieżkę do lokalizacji pliku
+
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -16,4 +19,6 @@ urlpatterns = [
     path('results/pressure/', views.pressure_results, name='pressure_results'),
     path('settings/', views.placeholder, name='settings'),
     path('logout/', views.custom_logout, name='logout'),  
+    path('test-email/', test_email),
+    path('test-alerts/', views.test_alerts),
 ]

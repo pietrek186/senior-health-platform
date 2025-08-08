@@ -4,6 +4,10 @@ from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from medications.utils import send_medication_notifications
+
 
 def home(request):
     return render(request, 'core/home.html')
@@ -48,3 +52,19 @@ def select_results(request):
 @login_required
 def pressure_results(request):
     return render(request, 'pressure/pressure_results.html')  # do stworzenia
+
+
+def test_email(request):
+    send_mail(
+        subject='Test e-maila z aplikacji Django',
+        message='To jest wiadomość testowa wysłana z projektu ZdrowieApp.',
+        from_email=None,  # użyje DEFAULT_FROM_EMAIL z settings.py
+        recipient_list=['zdrowieapp2025@gmail.com'],
+        fail_silently=False,
+    )
+    return HttpResponse('E-mail został wysłany!')
+
+
+def test_alerts(request):
+    send_medication_alerts()
+    return HttpResponse("Powiadomienia zostały wysłane.")

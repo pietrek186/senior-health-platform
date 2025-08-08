@@ -2,42 +2,143 @@
 {% load static %}
 
 {% block content %}
+<style>
+  .custom-button {
+    background-color: white;
+    color: #007bff;
+    border: 1px solid #007bff;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .custom-button:hover {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .form-label-col {
+    flex: 0 0 180px;
+    min-width: 180px;
+    font-weight: 500;
+    padding-right: 15px;
+    text-align: left;
+  }
+
+  .form-input-col {
+    flex: 1;
+  }
+
+  .form-control {
+    width: 100%;
+  }
+
+  .form-switch .form-check-input {
+    cursor: pointer;
+  }
+</style>
+
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Dodaj lek</h2>
-    <div class="row justify-content-center">
-        <div class="col-12" style="max-width: 500px;">
-            <form method="post" class="bg-white p-4 rounded shadow">
-                {% csrf_token %}
-                {% for field in form %}
-                    {% if field.name != 'dosage' and field.name != 'prescription_required' %}
-                        <div class="row mb-3 align-items-center">
-                            <label for="{{ field.id_for_label }}" class="col-md-4 col-form-label">{{ field.label }}</label>
-                            <div class="col-md-8">
-                                {{ field }}
-                                {% if field.help_text %}
-                                    <div class="form-text text-wrap text-break small">{{ field.help_text }}</div>
-                                {% endif %}
-                                {% if field.errors %}
-                                    <div class="text-danger small">{{ field.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% elif field.name == 'prescription_required' %}
-                        <div class="row mb-3 align-items-center">
-                            <div class="col-md-4 col-form-label">Czy lek na receptę?</div>
-                            <div class="col-md-8">
-                                <div class="form-check form-switch">
-                                    {{ field }}
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-                <div class="text-center">
-                    <button type="submit" class="btn btn-outline-primary">Zapisz</button>
-                </div>
-            </form>
+  <h2 class="text-center mb-4">Dodaj lek</h2>
+  <div class="d-flex justify-content-center">
+    <form method="post" class="bg-white p-4 rounded shadow-sm" style="max-width: 600px; width: 100%;">
+      {% csrf_token %}
+      
+      <!-- Nazwa -->
+      <div class="form-row">
+        <div class="form-label-col">Nazwa leku</div>
+        <div class="form-input-col">{{ form.name }}</div>
+      </div>
+
+      <!-- Syrop / Tabletka przełącznik -->
+      <div class="form-row">
+        <div class="form-label-col">Syrop?</div>
+        <div class="form-input-col">
+            {{ form.form }}
+            <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="isSyrupSwitch">
+            </div>
         </div>
     </div>
+
+      <!-- Tabletki -->
+      <div id="tablet-fields">
+        <div class="form-row">
+          <div class="form-label-col">Ilość tabletek w opakowaniu</div>
+          <div class="form-input-col">{{ form.quantity }}</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label-col">Ilość tabletek na dawkę</div>
+          <div class="form-input-col">{{ form.dosage_amount }}</div>
+        </div>
+      </div>
+
+      <!-- Syrop -->
+      <div id="syrup-fields" style="display: none;">
+        <div class="form-row">
+          <div class="form-label-col">Objętość syropu (ml)</div>
+          <div class="form-input-col">{{ form.volume_ml }}</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label-col">Dawka syropu (ml)</div>
+          <div class="form-input-col">{{ form.dosage_ml_per_time }}</div>
+        </div>
+      </div>
+
+      <!-- Wspólne -->
+      <div class="form-row">
+        <div class="form-label-col">Częstotliwość dawkowania (na dobę)</div>
+        <div class="form-input-col">{{ form.frequency }}</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label-col">Data rozpoczęcia</div>
+        <div class="form-input-col">{{ form.start_date }}</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label-col">Czy lek na receptę?</div>
+        <div class="form-input-col">
+            <div class="form-check form-switch">
+            {{ form.prescription_required }}
+            </div>
+        </div>
+    </div>
+
+      <div class="form-row">
+        <div class="form-label-col">Data ważności</div>
+        <div class="form-input-col">{{ form.expiration_date }}</div>
+      </div>
+
+      <!-- Przycisk -->
+      <div class="text-center mt-4">
+        <button type="submit" class="btn custom-button">Zapisz</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+<script>
+  // Pokazuj odpowiednie pola zależnie od przełącznika syrop/tabletki
+  const syrupSwitch = document.getElementById('isSyrupSwitch');
+  const syrupFields = document.getElementById('syrup-fields');
+  const tabletFields = document.getElementById('tablet-fields');
+  const formField = document.querySelector('input[name="form"]');
+
+  function toggleFields() {
+    const isSyrup = syrupSwitch.checked;
+    syrupFields.style.display = isSyrup ? 'block' : 'none';
+    tabletFields.style.display = isSyrup ? 'none' : 'block';
+    formField.value = isSyrup ? 'syrup' : 'tablet';
+  }
+
+  syrupSwitch.addEventListener('change', toggleFields);
+  document.addEventListener('DOMContentLoaded', () => {
+    toggleFields();  // wywołanie przy załadowaniu
+  });
+</script>
 {% endblock %}

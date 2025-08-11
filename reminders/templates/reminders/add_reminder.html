@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .form-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background-color: #f8fbff; /* delikatne białe z odcieniem niebieskiego */
+    padding: 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid #6cb2eb; /* wyraźniejsza niebieska ramka */
+  }
+  .form-row { margin-bottom: 1rem; }
+  .form-label-center {
+    display: block;
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+</style>
+
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Dodaj przypomnienie</h2>
+
+  <div class="form-container">
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Tytuł przypomnienia (lista + pole Inne) -->
+      <div class="form-row">
+        <label for="title_select" class="form-label-center">Tytuł przypomnienia:</label>
+        <select id="title_select" name="title_select" class="form-select">
+          <option value="Pomiar cukru">Przypomnienie o pomiarze cukru</option>
+          <option value="Pomiar ciśnienia">Przypomnienie o pomiarze ciśnienia</option>
+          <option value="Lekarstwa">Przypomnienie o zażyciu lekarstw</option>
+          <option value="Inne">Inne</option>
+        </select>
+      </div>
+
+      <!-- Własny tytuł -->
+      <div class="form-row" id="custom_title_row" style="display: none;">
+        <label for="custom_title" class="form-label-center">Wpisz własny tytuł:</label>
+        <input type="text" name="custom_title" id="custom_title" class="form-control">
+      </div>
+
+      <!-- Data -->
+      <div class="form-row">
+        <label for="date" class="form-label-center">Data:</label>
+        <input type="date" name="date" id="date" class="form-control" required>
+      </div>
+
+      <!-- Godzina -->
+      <div class="form-row">
+        <label for="time" class="form-label-center">Godzina:</label>
+        <input type="time" name="time" id="time" class="form-control" required>
+      </div>
+
+      <!-- Powtarzanie (switche) -->
+      <div class="form-row">
+        <span class="form-label-center">Powtarzanie:</span>
+        <div class="d-flex flex-column align-items-center gap-2">
+          <div class="form-check form-switch d-flex align-items-center gap-2">
+            <input class="form-check-input" type="checkbox" name="repeat_daily" id="repeat_daily">
+            <label class="form-check-label" for="repeat_daily">Codziennie</label>
+          </div>
+          <div class="form-check form-switch d-flex align-items-center gap-2">
+            <input class="form-check-input" type="checkbox" name="repeat_weekly" id="repeat_weekly">
+            <label class="form-check-label" for="repeat_weekly">Co tydzień</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <button type="submit" class="btn btn-dark">Dodaj przypomnienie</button>
+        <a href="{% url 'reminder_list' %}" class="btn btn-secondary ms-2">Anuluj</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const titleSelect = document.getElementById("title_select");
+  const customTitleRow = document.getElementById("custom_title_row");
+
+  function toggleCustomTitle() {
+    customTitleRow.style.display = (titleSelect.value === "Inne") ? "block" : "none";
+  }
+  document.addEventListener("DOMContentLoaded", toggleCustomTitle);
+  titleSelect.addEventListener("change", toggleCustomTitle);
+</script>
+{% endblock %}

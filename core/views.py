@@ -8,7 +8,6 @@ from django.core.mail import send_mail
 from django.http import HttpResponse
 from medications.utils import send_medication_notifications
 
-
 def home(request):
     return render(request, 'core/home.html')
 

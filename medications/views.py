@@ -16,13 +16,12 @@ def add_medication(request):
             med = form.save(commit=False)
             med.user = request.user
 
-            # Oblicz ilość w oparciu o dawkę i częstotliwość
+            # Oblicz ilość w oparciu o dawkę i częstotliwość (LOGIKA DODAWANIA – BEZ ZMIAN)
             if med.form == Medication.FORM_TABLET:
                 dosage_amount = form.cleaned_data.get('dosage_amount') or 1
                 frequency = form.cleaned_data.get('frequency') or 1
                 med.dosage_amount = dosage_amount
 
-                # Jeśli nie ma daty ważności – ustaw tylko dzienną dawkę jako bazową ilość
                 if med.expiration_date and med.start_date:
                     duration_days = (med.expiration_date - med.start_date).days + 1
                     med.quantity = dosage_amount * frequency * duration_days
@@ -33,7 +32,8 @@ def add_medication(request):
                 vol = form.cleaned_data.get('volume_ml') or 0
                 per = form.cleaned_data.get('dosage_ml_per_time') or 1
                 frequency = form.cleaned_data.get('frequency') or 1
-                med.quantity = (vol // per) * frequency  # liczba dawek w „sztukach dawek” (spójnie z resztą)
+                # dla syropu nadal trzymamy w modelu quantity jako „liczbę dawek” – jak dotąd
+                med.quantity = (vol // per) * frequency
 
             med.save()
             messages.success(request, 'Lek został pomyślnie dodany do apteczki.')
@@ -45,7 +45,6 @@ def add_medication(request):
 
 @login_required
 def medication_list(request):
-    # najnowsze na górze – zgodnie z created_at i DataTables bez własnego sortowania
     medications = Medication.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'medications/medication_list.html', {
         'medications': medications
@@ -59,31 +58,31 @@ def edit_medication(request, pk):
     if request.method == 'POST':
         form = MedicationForm(request.POST, instance=med)
         if form.is_valid():
+            # >>> KLUCZOWA ZMIANA: NIE PRZELICZAMY QUANTITY NA NOWO.
+            # Przyjmujemy dokładnie to, co podał użytkownik w formularzu.
             med = form.save(commit=False)
             med.user = request.user
 
+            # Drobne sanity checks (bez ruszania ilości):
             if med.form == Medication.FORM_TABLET:
-                dosage_amount = form.cleaned_data.get('dosage_amount') or 1
-                frequency = form.cleaned_data.get('frequency') or 1
-                med.dosage_amount = dosage_amount
-
-                if med.expiration_date and med.start_date:
-                    duration_days = (med.expiration_date - med.start_date).days + 1
-                    med.quantity = dosage_amount * frequency * duration_days
-                else:
-                    med.quantity = dosage_amount * frequency
+                # Upewnij się, że wpisana ilość nie jest None
+                if med.quantity is None:
+                    med.quantity = 0
+                # Upewnij się, że dosage_amount ma sensowną wartość
+                if not med.dosage_amount:
+                    med.dosage_amount = 1
 
             elif med.form == Medication.FORM_SYRUP:
-                vol = form.cleaned_data.get('volume_ml') or 0
-                per = form.cleaned_data.get('dosage_ml_per_time') or 1
-                frequency = form.cleaned_data.get('frequency') or 1
-                med.quantity = (vol // per) * frequency
+                # Dla syropu quantity nie dotykamy – pozostaje jak było.
+                # Aktualizujemy jedynie volume_ml / dosage_ml_per_time / frequency,
+                # co i tak robi save(form) powyżej.
+                pass
 
             med.save()
             messages.success(request, 'Lek został pomyślnie zaktualizowany.')
             return redirect('medication_list')
     else:
-        # >>> TU DODAJEMY: wypełniamy pola aktualnym stanem, nie „fabrycznym”
+        # Dla wygody edycji – pokaż w formularzu bieżący stan, nie „fabryczny”
         initial = {'form': med.form}
         if med.form == Medication.FORM_TABLET:
             initial['quantity'] = int(med.remaining_quantity or 0)
@@ -128,8 +127,7 @@ def export_medications_csv(request):
         'Na receptę',
     ])
     for m in qs:
-        # eksportuj bieżący stan, a nie stan początkowy
-        current_qty = int(m.remaining_quantity or 0) if m.form == Medication.FORM_TABLET else int(m.remaining_quantity or 0)
+        current_qty = int(m.remaining_quantity or 0)
         writer.writerow([
             m.name,
             dict(Medication.FORM_CHOICES)[m.form],

@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.shortcuts import render
-from django.urls import path
+from django.urls import path, include
 from .views import test_email  # dopasuj ścieżkę do lokalizacji pliku
 
 
@@ -21,4 +21,5 @@ urlpatterns = [
     path('logout/', views.custom_logout, name='logout'),  
     path('test-email/', test_email),
     path('test-alerts/', views.test_alerts),
+    path('reminders/', include('reminders.urls')),
 ]

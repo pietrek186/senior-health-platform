@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Oblicz swój wskaźnik BMI</h2>
 
-    <form method="post" class="card p-4 shadow-sm mx-auto" style="max-width: 500px;">
+    <form method="post" class="card p-4 shadow-sm mx-auto bmi-card" style="max-width: 500px;">
         {% csrf_token %}
         <div class="mb-3">
             {{ form.weight.label_tag }}
@@ -20,7 +20,7 @@
     </form>
 
     {% if result %}
-    <div class="card mt-5 p-4 mx-auto shadow-sm text-center" style="max-width: 800px;">
+    <div class="card mt-5 p-4 mx-auto shadow-sm text-center bmi-card" style="max-width: 800px;">
         <h4 class="mb-3">Twój wynik BMI</h4>
         <p><strong>BMI:</strong> {{ result.bmi }}</p>
         <p><strong>Kategoria:</strong> {{ result.category }}</p>
@@ -77,6 +77,12 @@
     .custom-btn:hover {
         background-color: #0d6efd;
         color: white;
+    }
+
+    /* Niebieska ramka dla kart */
+    .bmi-card {
+        border: 2px solid #6cb2eb;
+        border-radius: 14px;
     }
 
     .bmi-scale {

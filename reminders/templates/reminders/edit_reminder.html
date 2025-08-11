@@ -1,0 +1,122 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* karta jak w edycji ciśnienia */
+  .edit-card {
+    max-width: 600px;
+    width: 100%;
+    background: #fff;
+    border: 2px solid #6cb2eb;   /* <-- niebieska ramka 2px */
+    border-radius: 14px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    padding: 24px;
+  }
+  .form-row {
+    margin-bottom: 16px;
+  }
+  .form-label-center {
+    display: block;
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+</style>
+
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Edytuj przypomnienie</h2>
+
+  <div class="d-flex justify-content-center">
+    <form method="post" class="edit-card">
+      {% csrf_token %}
+
+      <!-- Tytuł (lista + Inne) -->
+      <div class="form-row">
+        <label for="title_select" class="form-label-center">Tytuł przypomnienia:</label>
+        <select id="title_select" name="title_select" class="form-select">
+          <option value="Pomiar cukru">Przypomnienie o pomiarze cukru</option>
+          <option value="Pomiar ciśnienia">Przypomnienie o pomiarze ciśnienia</option>
+          <option value="Lekarstwa">Przypomnienie o zażyciu lekarstw</option>
+          <option value="Inne">Inne</option>
+        </select>
+      </div>
+
+      <!-- Własny tytuł -->
+      <div class="form-row" id="custom_title_row" style="display:none;">
+        <label for="custom_title" class="form-label-center">Wpisz własny tytuł:</label>
+        <input type="text" name="custom_title" id="custom_title" class="form-control" placeholder="Np. Przypomnienie o spacerze">
+      </div>
+
+      <!-- Data -->
+      <div class="form-row">
+        <label for="date" class="form-label-center">Data:</label>
+        <input type="date" name="date" id="date" class="form-control" value="{{ reminder.date|date:'Y-m-d' }}" required>
+      </div>
+
+      <!-- Godzina -->
+      <div class="form-row">
+        <label for="time" class="form-label-center">Godzina:</label>
+        <input type="time" name="time" id="time" class="form-control" value="{{ reminder.time|time:'H:i' }}" required>
+      </div>
+
+      <!-- Powtarzanie (switche) -->
+      <div class="form-row">
+        <label class="form-label-center">Powtarzanie:</label>
+        <div class="d-flex justify-content-center gap-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="repeat_daily" id="repeat_daily"
+                   {% if reminder.recurrence == 'daily' %}checked{% endif %}>
+            <label class="form-check-label" for="repeat_daily">Codziennie</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="repeat_weekly" id="repeat_weekly"
+                   {% if reminder.recurrence == 'weekly' %}checked{% endif %}>
+            <label class="form-check-label" for="repeat_weekly">Co tydzień</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Przyciski -->
+      <div class="text-center mt-3">
+        <button type="submit" class="btn btn-dark me-2">Zapisz zmiany</button>
+        <a href="{% url 'reminder_list' %}" class="btn btn-secondary">Anuluj</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- przekazujemy aktualny tytuł z backendu -->
+{{ reminder.title|json_script:"currentTitle" }}
+<script>
+  // predefiniowane opcje
+  const predefined = ["Pomiar cukru", "Pomiar ciśnienia", "Lekarstwa"];
+  const titleSelect = document.getElementById("title_select");
+  const customTitleRow = document.getElementById("custom_title_row");
+  const customTitleInput = document.getElementById("custom_title");
+
+  function initTitle() {
+    const current = JSON.parse(document.getElementById("currentTitle").textContent);
+    if (predefined.includes(current)) {
+      titleSelect.value = current;
+      customTitleRow.style.display = "none";
+      customTitleInput.value = "";
+    } else {
+      titleSelect.value = "Inne";
+      customTitleRow.style.display = "block";
+      customTitleInput.value = current;
+    }
+  }
+
+  function toggleCustomTitle() {
+    const isOther = titleSelect.value === "Inne";
+    customTitleRow.style.display = isOther ? "block" : "none";
+    if (!isOther) customTitleInput.value = "";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initTitle();
+    titleSelect.addEventListener("change", toggleCustomTitle);
+  });
+</script>
+{% endblock %}

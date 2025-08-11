@@ -3,142 +3,117 @@
 
 {% block content %}
 <style>
-  .custom-button {
-    background-color: white;
-    color: #007bff;
-    border: 1px solid #007bff;
-    transition: background-color 0.3s, color 0.3s;
+  .form-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background-color: #f0f8ff; /* lekko niebieskie tło */
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
-
-  .custom-button:hover {
-    background-color: #007bff;
-    color: white;
-  }
-
   .form-row {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 14px;
   }
-
   .form-label-col {
-    flex: 0 0 180px;
-    min-width: 180px;
+    flex: 0 0 240px;
+    min-width: 240px;
     font-weight: 500;
-    padding-right: 15px;
+    padding-right: 16px;
     text-align: left;
   }
-
   .form-input-col {
     flex: 1;
-  }
-
-  .form-control {
-    width: 100%;
-  }
-
-  .form-switch .form-check-input {
-    cursor: pointer;
   }
 </style>
 
 <div class="container mt-5">
   <h2 class="text-center mb-4">Edytuj lek</h2>
-  <div class="d-flex justify-content-center">
-    <form method="post" class="bg-white p-4 rounded shadow-sm" style="max-width: 600px; width: 100%;">
+
+  <div class="form-container">
+    <form method="post">
       {% csrf_token %}
 
       <!-- Nazwa -->
       <div class="form-row">
-        <div class="form-label-col">Nazwa leku</div>
+        <div class="form-label-col">Nazwa leku:</div>
         <div class="form-input-col">{{ form.name }}</div>
       </div>
 
-      <!-- Syrop / Tabletka przełącznik -->
-      <!-- Syrop / Tabletka przełącznik jako SWITCH -->
+      <!-- Syrop? (przełącznik) + ukryte pole 'form' -->
       <div class="form-row">
         <div class="form-label-col">Syrop?</div>
         <div class="form-input-col">
-          {{ form.form }}
+          <span style="display:none;">{{ form.form }}</span>
           <div class="form-check form-switch">
-            <input class="form-check-input"
-                  type="checkbox"
-                  id="isSyrupSwitch"
-                  {% if form.initial.form == 'syrup' or form.form.value == 'syrup' %}checked{% endif %}>
+            <input class="form-check-input" type="checkbox" id="isSyrupSwitch">
           </div>
         </div>
       </div>
 
-
-      <!-- Tabletki -->
+      <!-- Pola dla tabletek -->
       <div id="tablet-fields">
         <div class="form-row">
-          <div class="form-label-col">Ilość tabletek</div>
+          <div class="form-label-col">Ilość tabletek w opakowaniu:</div>
           <div class="form-input-col">{{ form.quantity }}</div>
         </div>
         <div class="form-row">
-          <div class="form-label-col">Ilość tabletek na dawkę</div>
+          <div class="form-label-col">Ilość tabletek na dawkę:</div>
           <div class="form-input-col">{{ form.dosage_amount }}</div>
         </div>
       </div>
 
-      <!-- Syrop -->
-      <div id="syrup-fields" style="display: none;">
+      <!-- Pola dla syropu -->
+      <div id="syrup-fields" style="display:none;">
         <div class="form-row">
-          <div class="form-label-col">Objętość syropu (ml)</div>
+          <div class="form-label-col">Objętość syropu (ml):</div>
           <div class="form-input-col">{{ form.volume_ml }}</div>
         </div>
         <div class="form-row">
-          <div class="form-label-col">Dawka syropu (ml)</div>
+          <div class="form-label-col">Dawka syropu (ml):</div>
           <div class="form-input-col">{{ form.dosage_ml_per_time }}</div>
         </div>
       </div>
 
-      <!-- Częstotliwość -->
+      <!-- Wspólne -->
       <div class="form-row">
-        <div class="form-label-col">Częstotliwość dawkowania (na dobę)</div>
+        <div class="form-label-col">Częstotliwość dawkowania (na dobę):</div>
         <div class="form-input-col">{{ form.frequency }}</div>
       </div>
 
-      <!-- Data rozpoczęcia -->
+      <!-- DATA ROZPOCZĘCIA -->
       <div class="form-row">
-        <div class="form-label-col">Data rozpoczęcia</div>
+        <div class="form-label-col">Data rozpoczęcia:</div>
         <div class="form-input-col">
-          <input type="date"
-                 name="{{ form.start_date.name }}"
-                 class="form-control"
-                 value="{{ form.initial.start_date|default:form.start_date.value|date:'Y-m-d' }}">
+          <input type="date" name="start_date" class="form-control"
+                 value="{{ form.instance.start_date|date:'Y-m-d' }}">
         </div>
       </div>
 
-      <!-- Recepta jako switch -->
+      <!-- Recepta -->
       <div class="form-row">
         <div class="form-label-col">Czy lek na receptę?</div>
         <div class="form-input-col">
           <div class="form-check form-switch">
-            <input class="form-check-input"
-                   type="checkbox"
-                   name="{{ form.prescription_required.name }}"
-                   id="id_prescription_required"
-                   {% if form.initial.prescription_required or form.prescription_required.value %}checked{% endif %}>
+            {{ form.prescription_required }}
           </div>
         </div>
       </div>
 
-      <!-- Data ważności -->
+      <!-- DATA WAŻNOŚCI -->
       <div class="form-row">
-        <div class="form-label-col">Data ważności</div>
+        <div class="form-label-col">Data ważności:</div>
         <div class="form-input-col">
-          <input type="date"
-                 name="{{ form.expiration_date.name }}"
-                 class="form-control"
-                 value="{{ form.initial.expiration_date|default:form.expiration_date.value|date:'Y-m-d' }}">
+          <input type="date" name="expiration_date" class="form-control"
+                 value="{{ form.instance.expiration_date|date:'Y-m-d' }}">
         </div>
       </div>
 
-      <!-- Przycisk -->
-      <div class="text-center mt-4">
-        <button type="submit" class="btn custom-button">Zapisz zmiany</button>
+      <!-- Przyciski -->
+      <div class="text-center mt-3">
+        <button type="submit" class="btn btn-dark me-2">Zapisz zmiany</button>
+        <a href="{% url 'medication_list' %}" class="btn btn-secondary">Anuluj</a>
       </div>
     </form>
   </div>
@@ -150,17 +125,22 @@
   const tabletFields = document.getElementById('tablet-fields');
   const formField = document.querySelector('input[name="form"]');
 
-  function toggleFields() {
-    const isSyrup = syrupSwitch.checked;
+  function applyState(isSyrup) {
     syrupFields.style.display = isSyrup ? 'block' : 'none';
     tabletFields.style.display = isSyrup ? 'none' : 'block';
-    formField.value = isSyrup ? 'syrup' : 'tablet';
+    if (formField) formField.value = isSyrup ? 'syrup' : 'tablet';
+  }
+
+  function initFromCurrent() {
+    const current = formField ? (formField.value || '').toLowerCase() : '';
+    const isSyrup = current === 'syrup' || current === 'syrop';
+    syrupSwitch.checked = isSyrup;
+    applyState(isSyrup);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    syrupSwitch.checked = "{{ form.initial.form|default:form.form.value }}" === "syrup";
-    toggleFields();
-    syrupSwitch.addEventListener('change', toggleFields);
+    initFromCurrent();
+    syrupSwitch.addEventListener('change', () => applyState(syrupSwitch.checked));
   });
 </script>
 {% endblock %}

@@ -150,4 +150,5 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CRON_CLASSES = [
     "medications.cron.MedicationAlertCronJob",
+    'reminders.cron.ReminderCronJob',
 ]

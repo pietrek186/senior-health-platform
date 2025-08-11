@@ -1,0 +1,79 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Twoje przypomnienia</h2>
+
+  <div class="text-center mb-4">
+    <a href="{% url 'add_reminder' %}" class="btn btn-primary">Dodaj przypomnienie</a>
+  </div>
+
+  <div class="table-responsive">
+    <table id="remindersTable" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Tytuł</th>
+          <th>Data</th>
+          <th>Godzina</th>
+          <th>Powtarzanie</th>
+          <th>Akcje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reminder in reminders %}
+        <tr>
+          <td>{{ reminder.title }}</td>
+          <td>{{ reminder.date }}</td>
+          <td>{{ reminder.time }}</td>
+          <td>
+            {% if reminder.recurrence == 'daily' %} Codziennie
+            {% elif reminder.recurrence == 'weekly' %} Co tydzień
+            {% else %} Brak
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="{% url 'edit_reminder' reminder.id %}" class="btn btn-outline-primary btn-sm me-2">Edytuj</a>
+            <a href="{% url 'delete_reminder' reminder.id %}" class="btn btn-outline-danger btn-sm">Usuń</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center">Brak przypomnień</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- jQuery (jeśli nie masz globalnie w base.html) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+
+<script>
+  $(document).ready(function () {
+    $('#remindersTable').DataTable({
+      searching: false,   // ← WYŁĄCZA pole „Szukaj”
+      language: {
+        lengthMenu: "Pokaż _MENU_ wpisów na stronę",
+        zeroRecords: "Brak wyników",
+        info: "Strona _PAGE_ z _PAGES_",
+        infoEmpty: "Brak dostępnych przypomnień",
+        infoFiltered: "(filtrowane z _MAX_ wszystkich wpisów)",
+        paginate: {
+          first: "Pierwsza",
+          last: "Ostatnia",
+          next: "Następna",
+          previous: "Poprzednia"
+        }
+      },
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50]
+    });
+  });
+</script>
+{% endblock %}

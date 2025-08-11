@@ -22,4 +22,5 @@ urlpatterns = [
     path('test-email/', test_email),
     path('test-alerts/', views.test_alerts),
     path('reminders/', include('reminders.urls')),
+    path('sos/', views.sos_alert, name='sos_alert'),
 ]

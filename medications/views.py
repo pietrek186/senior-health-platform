@@ -16,24 +16,19 @@ def add_medication(request):
             med = form.save(commit=False)
             med.user = request.user
 
-            # Oblicz ilość w oparciu o dawkę i częstotliwość (LOGIKA DODAWANIA – BEZ ZMIAN)
+            # >>> KLUCZOWA ZMIANA: NIE PRZELICZAMY ILOŚCI.
+            # Zapisujemy dokładnie to, co podał użytkownik w formularzu.
             if med.form == Medication.FORM_TABLET:
-                dosage_amount = form.cleaned_data.get('dosage_amount') or 1
-                frequency = form.cleaned_data.get('frequency') or 1
-                med.dosage_amount = dosage_amount
-
-                if med.expiration_date and med.start_date:
-                    duration_days = (med.expiration_date - med.start_date).days + 1
-                    med.quantity = dosage_amount * frequency * duration_days
-                else:
-                    med.quantity = dosage_amount * frequency
+                med.quantity = form.cleaned_data.get('quantity') or 0
+                med.dosage_amount = form.cleaned_data.get('dosage_amount') or 1
+                med.frequency = form.cleaned_data.get('frequency') or 1
 
             elif med.form == Medication.FORM_SYRUP:
-                vol = form.cleaned_data.get('volume_ml') or 0
-                per = form.cleaned_data.get('dosage_ml_per_time') or 1
-                frequency = form.cleaned_data.get('frequency') or 1
-                # dla syropu nadal trzymamy w modelu quantity jako „liczbę dawek” – jak dotąd
-                med.quantity = (vol // per) * frequency
+                med.volume_ml = form.cleaned_data.get('volume_ml') or 0
+                med.dosage_ml_per_time = form.cleaned_data.get('dosage_ml_per_time') or 0
+                med.frequency = form.cleaned_data.get('frequency') or 1
+                # quantity dla syropu nie jest używane do obliczeń – ustaw na 0 dla porządku
+                med.quantity = 0
 
             med.save()
             messages.success(request, 'Lek został pomyślnie dodany do apteczki.')
@@ -58,31 +53,24 @@ def edit_medication(request, pk):
     if request.method == 'POST':
         form = MedicationForm(request.POST, instance=med)
         if form.is_valid():
-            # >>> KLUCZOWA ZMIANA: NIE PRZELICZAMY QUANTITY NA NOWO.
-            # Przyjmujemy dokładnie to, co podał użytkownik w formularzu.
+            # >>> BEZ PRZELICZEŃ – zachowujemy to, co poda użytkownik.
             med = form.save(commit=False)
             med.user = request.user
 
-            # Drobne sanity checks (bez ruszania ilości):
             if med.form == Medication.FORM_TABLET:
-                # Upewnij się, że wpisana ilość nie jest None
                 if med.quantity is None:
                     med.quantity = 0
-                # Upewnij się, że dosage_amount ma sensowną wartość
                 if not med.dosage_amount:
                     med.dosage_amount = 1
 
             elif med.form == Medication.FORM_SYRUP:
-                # Dla syropu quantity nie dotykamy – pozostaje jak było.
-                # Aktualizujemy jedynie volume_ml / dosage_ml_per_time / frequency,
-                # co i tak robi save(form) powyżej.
                 pass
 
             med.save()
             messages.success(request, 'Lek został pomyślnie zaktualizowany.')
             return redirect('medication_list')
     else:
-        # Dla wygody edycji – pokaż w formularzu bieżący stan, nie „fabryczny”
+        # Dla wygody – w polu ilości pokaż bieżący pozostały stan
         initial = {'form': med.form}
         if med.form == Medication.FORM_TABLET:
             initial['quantity'] = int(med.remaining_quantity or 0)

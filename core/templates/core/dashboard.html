@@ -12,20 +12,20 @@
     }
 
     .sun-btn {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    width: 240px;
-    height: 72px;
-    font-size: 1.3rem;
-    font-weight: 500;
-    border-radius: 1rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    text-decoration: none;
-}
+        position: absolute;
+        transform: translate(-50%, -50%);
+        width: 240px;
+        height: 72px;
+        font-size: 1.3rem;
+        font-weight: 500;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        text-decoration: none;
+    }
 
     .sun-sos {
         position: absolute;
@@ -67,8 +67,15 @@
     <p class="mb-4">Witaj w aplikacji! Wybierz funkcję:</p>
 
     <div class="sun-container">
-        <!-- SOS -->
-        <a href="#" class="btn btn-danger sun-sos">SOS</a>
+        <!-- SOS (POST + CSRF) -->
+        <form method="post" action="{% url 'sos_alert' %}" class="d-inline"
+              onsubmit="const btn=this.querySelector('button'); btn.disabled=true; btn.dataset.orig=btn.innerHTML; btn.innerHTML='Wysyłanie...';">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger sun-sos d-flex align-items-center justify-content-center"
+                    aria-label="Wyślij alert SOS">
+                <span>SOS</span>
+            </button>
+        </form>
 
         <a href="{% url 'add_glucose' %}" class="btn btn-outline-primary sun-btn" style="top: 25%; left: 10%;">Pomiary glukozy</a>
         <a href="{% url 'pressure' %}" class="btn btn-outline-primary sun-btn" style="top: 25%; left: 90%;">Pomiary ciśnienia</a>

@@ -34,6 +34,18 @@
             {% if user.is_authenticated and request.resolver_match.url_name != "login" and request.resolver_match.url_name != "register" %}
             <!-- Ikony po prawej stronie widoczne po zalogowaniu na każdej stronie oprócz loginu i rejestracji -->
             <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
+                <!-- Ulepszony widok e-maila zalogowanego użytkownika -->
+                <li class="nav-item mx-2">
+                    <span class="navbar-text d-flex align-items-center gap-2">
+                        <i class="bi bi-person-circle opacity-75" style="font-size:1.1rem;"></i>
+                        <span class="small d-none d-sm-inline text-truncate text-white fw-normal"
+                              style="max-width: 220px;"
+                              title="{% firstof user.email user.get_username %}">
+                            {% firstof user.email user.get_username %}
+                        </span>
+                    </span>
+                </li>
+
                 <li class="nav-item mx-1">
                     <a class="btn btn-outline-light rounded px-2" href="{% url 'select_results' %}" title="Wyniki pomiarów">
                         <i class="bi bi-graph-up" style="font-size: 1.2rem;"></i>
@@ -96,4 +108,3 @@
 </script>
 </body>
 </html>
-

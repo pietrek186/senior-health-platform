@@ -11,10 +11,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -152,3 +155,14 @@ CRON_CLASSES = [
     "medications.cron.MedicationAlertCronJob",
     'reminders.cron.ReminderCronJob',
 ]
+
+
+# SMSAPI – ustawienia do wysyłki SMS (SOS)
+SMSAPI_TOKEN = os.environ.get("SMSAPI_TOKEN")
+SMSAPI_SENDER = os.environ.get("SMSAPI_SENDER")  
+SMSAPI_TEST_MODE = False  # na start włączam tryb testowy (nie nalicza kosztów). Wyłączę po teście.
+SMSAPI_NORMALIZE = True 
+SOS_SMS_ENABLED = False ### WAŻNE Jak zmienię na True, to wyśle się normalnie SMS.
+
+# (opcjonalnie) awaryjny adres, jeśli user nie ma guardian_email
+DEFAULT_GUARDIAN_EMAIL = os.environ.get("DEFAULT_GUARDIAN_EMAIL")

@@ -35,8 +35,9 @@
         {{ form.diastolic }}
       </div>
 
-      <div class="text-center">
+      <div class="text-center d-flex justify-content-center gap-2">
         <button type="submit" class="btn btn-dark">Zapisz</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Anuluj</a>
       </div>
     </form>
   </div>

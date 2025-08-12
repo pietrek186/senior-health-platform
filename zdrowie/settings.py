@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "medications",
     "django_cron",
     "reminders",
+    "accounts",
 ]
 
 MIDDLEWARE = [

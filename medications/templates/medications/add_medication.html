@@ -100,9 +100,10 @@
         <div class="form-input-col">{{ form.expiration_date }}</div>
       </div>
 
-      <!-- Przycisk -->
-      <div class="text-center mt-3">
+      <!-- Przyciski -->
+      <div class="text-center mt-3 d-flex justify-content-center gap-2">
         <button type="submit" class="btn btn-dark">Zapisz</button>
+        <a href="{% url 'medication_list' %}" class="btn btn-secondary">Anuluj</a>
       </div>
     </form>
   </div>

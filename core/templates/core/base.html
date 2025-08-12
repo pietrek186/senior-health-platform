@@ -52,7 +52,7 @@
                     </a>
                 </li>
                 <li class="nav-item mx-1">
-                    <a class="btn btn-outline-light rounded px-2" href="{% url 'settings' %}" title="Ustawienia">
+                    <a class="btn btn-outline-light rounded px-2" href="{% url 'accounts:settings' %}" title="Ustawienia">
                         <i class="bi bi-gear" style="font-size: 1.2rem;"></i>
                     </a>
                 </li>
@@ -94,15 +94,15 @@
 
 <script>
   // Automatyczne znikanie alertów po 4 sekundach,
-  // ale nie tych z identyfikatorem "bmi-note"
+  // ale nie tych z identyfikatorem "bmi-note" ANI z klasą "alert-sticky"
   setTimeout(function () {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(function (alert) {
-      // Jeśli alert nie ma ID "bmi-note", automatycznie go zamknij
-      if (!alert.id || alert.id !== "bmi-note") {
-        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-        bsAlert.close();
-      }
+      const isBmiNote = alert.id && alert.id === "bmi-note";
+      const isSticky = alert.classList.contains('alert-sticky');
+      if (isBmiNote || isSticky) return; // nie zamykaj
+      const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      bsAlert.close();
     });
   }, 4000);
 </script>

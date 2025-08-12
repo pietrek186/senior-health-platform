@@ -1,18 +1,27 @@
-# Środowisko wirtualne
+# Wirtualne środowiska
+.venv/
 venv/
 
-# Pliki bazy danych SQLite
+# Baza SQLite
 db.sqlite3
+*.sqlite3
 
-# Dane migracji Django (opcjonalnie, jeśli nie chcesz ich trackować)
-*/migrations/__pycache__/
-*/__pycache__/
-
-# Pliki tymczasowe
-*.pyc
+# Pliki tymczasowe Pythona
 __pycache__/
+**/__pycache__/
+*.py[cod]
 
-# Pliki systemowe
-.DS_Store
+# Logi, systemowe
 *.log
+.DS_Store
+
+# Sekrety
 .env
+
+# VS Code / IDE (opcjonalnie – jeśli nie chcesz dzielić ustawień)
+.vscode/
+.idea/
+
+# Zebrane statyczne / media (jeśli kiedyś użyjesz collectstatic / uploadów)
+staticfiles/
+media/

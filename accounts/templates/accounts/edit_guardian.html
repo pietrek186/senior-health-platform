@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+{% block content %}
+<style>
+  .wrap { max-width: 540px; margin: 24px auto; }
+  .blue-frame { border: 2px solid rgba(13,110,253,.6); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+  .soft-bg { background-color: #eef6ff; }
+  /* mniej miejsca na dole i ciut mniejsza min-wysokość */
+  .panel { padding: 16px 16px 10px; min-height: 310px; }
+  .panel .form-control { padding: .6rem .8rem; font-size: 1rem; }
+  .form-label { display:block; text-align:center; }
+</style>
+
+<div class="wrap">
+  <h2 class="text-center mb-3">Aktualizacja danych opiekuna</h2>
+
+  <div class="alert alert-info alert-dismissible fade show alert-sticky small text-center mb-3" role="alert">
+    <i class="bi bi-info-circle me-1"></i>
+    Wprowadź nowe dane opiekuna. E-mail i telefon służą do powiadomień.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <form method="post" novalidate class="blue-frame soft-bg panel">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger text-center">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.guardian_email.label }}</label>
+      {{ form.guardian_email }}
+      {% for e in form.guardian_email.errors %}<div class="text-danger small text-center">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label">{{ form.guardian_phone.label }}</label>
+      {{ form.guardian_phone }}
+      {% for e in form.guardian_phone.errors %}<div class="text-danger small text-center">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="form-text text-center mb-3">
+      Wpisz numer w formacie międzynarodowym, np. +48123123123.
+    </div>
+
+    <div class="d-flex justify-content-center gap-2">
+      <button type="submit" class="btn btn-dark">Zapisz</button>
+      <a href="{% url 'accounts:settings' %}" class="btn btn-secondary">Anuluj</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

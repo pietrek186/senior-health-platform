@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Czy na pewno chcesz usunąć ten plik?</h2>
+
+  <div class="text-center mb-4">
+    <div class="d-inline-block bg-light border rounded px-3 py-2">
+      <div class="small text-muted">Nazwa pliku:</div>
+      <div class="fw-semibold text-break">{{ fileobj.original_name }}</div>
+    </div>
+  </div>
+
+  <form method="post" class="d-flex justify-content-center gap-2">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Tak, usuń</button>
+    <a href="{% url 'records:list' %}" class="btn btn-secondary">Anuluj</a>
+  </form>
+</div>
+{% endblock %}

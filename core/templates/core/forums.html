@@ -1,0 +1,368 @@
+{% extends "core/base.html" %}
+{% block title %}Fora i poradniki{% endblock %}
+
+{% block content %}
+<style>
+  /* Wygląd kart – spójny z formularzami (jasnoniebieskie tło + niebieska ramka) */
+  .resource-card {
+    background-color: #f0f8ff; /* tak jak w form-container */
+    border: 2px solid rgba(13,110,253,0.45) !important; /* delikatna niebieska ramka */
+    border-radius: 12px; /* równe z form-container */
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .resource-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13,110,253,0.15);
+    border-color: #0d6efd !important; /* primary na hover */
+  }
+
+  /* Równe karty: treść układana kolumnowo, przycisk zawsze przy dole */
+  .resource-card .card-body {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Rząd z badge’ami – stała wysokość, by tytuł startował z tej samej linii */
+  .resource-card .badge-row {
+    min-height: 32px;
+  }
+  .resource-card .card-text {
+    margin-bottom: 0.75rem;
+  }
+  /* Call-to-action dociśnięty do dołu */
+  .resource-card .cta {
+    margin-top: auto;
+  }
+
+  /* Ciemny przycisk, który po najechaniu staje się niebieski */
+  .btn-cta {
+    background-color: #212529; /* bootstrapowa czerń z btn-dark */
+    color: #fff;
+    border-color: #212529;
+  }
+  .btn-cta:hover,
+  .btn-cta:focus {
+    background-color: #0d6efd; /* primary */
+    border-color: #0d6efd;
+    color: #fff;
+  }
+</style>
+
+<div class="container py-4">
+  <h1 class="text-center mb-2">Fora i poradniki</h1>
+  <p class="text-center text-muted mb-4">
+    Zweryfikowane społeczności, eksperckie artykuły i oficjalne wytyczne dla osób z cukrzycą i nadciśnieniem.
+  </p>
+
+  <div class="alert alert-info mx-auto" style="max-width: 920px;">
+    Materiały poniżej są rzetelne i aktualne, ale <strong>nie zastępują porady lekarskiej</strong>.
+    W razie wątpliwości skonsultuj się z lekarzem prowadzącym.
+  </div>
+
+  <!-- SEKCJA: FORA / SPOŁECZNOŚCI -->
+  <h2 class="h4 mt-4 mb-3">Społeczności (fora)</h2>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+    <!-- Serce na Banacha – forum -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="forum nadciśnienie serce kardiologia wsparcie">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-primary">Forum</span>
+            <span class="badge text-bg-light border">Kardiologia</span>
+          </div>
+          <h5 class="card-title mb-2">Forum pacjentów z chorobami serca</h5>
+          <p class="card-text small text-muted">
+            Moderowana społeczność (m.in. tematy o nadciśnieniu). Stowarzyszenie „Serce na Banacha”.
+          </p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://sercenabanacha.org.pl/forum/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ForumKardiologiczne – dział Nadciśnienie -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="forum nadciśnienie kardiologia pytania odpowiedzi">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-primary">Forum</span>
+            <span class="badge text-bg-light border">Nadciśnienie</span>
+          </div>
+          <h5 class="card-title mb-2">ForumKardiologiczne – Nadciśnienie</h5>
+          <p class="card-text small text-muted">
+            Wątki i dyskusje dotyczące nadciśnienia tętniczego.
+          </p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://forumkardiologiczne.pl/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gazeta – Cukrzyca (społeczność) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="forum cukrzyca społeczność doświadczenia pytania">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-primary">Forum</span>
+            <span class="badge text-bg-light border">Cukrzyca</span>
+          </div>
+          <h5 class="card-title mb-2">Społeczność: Cukrzyca (Forum Gazeta)</h5>
+          <p class="card-text small text-muted">
+            Wymiana doświadczeń pacjentów. (Pamiętaj: to nie jest porada lekarska.)
+          </p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://forum.gazeta.pl/forum/t%2Ccukrzyca.html"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKCJA: PORADNIKI I WYTYCZNE -->
+  <h2 class="h4 mt-5 mb-3">Poradniki i wytyczne</h2>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+    <!-- Pacjent.gov.pl – Jak żyć z cukrzycą -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="cukrzyca poradnik pacjent.gov.pl samokontrola">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">Portal rządowy</span>
+            <span class="badge text-bg-light border">Cukrzyca</span>
+          </div>
+          <h5 class="card-title mb-2">Jak żyć z cukrzycą</h5>
+          <p class="card-text small text-muted">Zasady samokontroli, kontrole u lekarza, podstawy terapii.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://pacjent.gov.pl/jak-zyc-z-choroba/jak-zyc-z-cukrzyca"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pacjent.gov.pl – Cukrzyca (PDF) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="cukrzyca poradnik pdf pacjent.gov.pl">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">Portal rządowy</span>
+            <span class="badge text-bg-light border">PDF</span>
+          </div>
+          <h5 class="card-title mb-2">Cukrzyca – kompendium (PDF)</h5>
+          <p class="card-text small text-muted">Zwięzłe, urzędowe opracowanie do pobrania.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://pacjent.gov.pl/print/pdf/node/4906"
+             target="_blank" rel="noopener noreferrer">Pobierz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MP.pl – Cukrzyca -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="cukrzyca mp.pl eksperci evidence-based">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-secondary">Artykuły eksperckie</span>
+            <span class="badge text-bg-light border">Cukrzyca</span>
+          </div>
+          <h5 class="card-title mb-2">Cukrzyca — kompendium (MP.pl)</h5>
+          <p class="card-text small text-muted">Treści opracowane przez lekarzy, EBM.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://www.mp.pl/cukrzyca"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- NCEZ PZH – Cukrzyca typu 2 (zalecenia + jadłospis) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="cukrzyca dieta jadłospis pzh ncez">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">Instytut państwowy</span>
+            <span class="badge text-bg-light border">Dieta</span>
+          </div>
+          <h5 class="card-title mb-2">Cukrzyca typu 2 — zalecenia i jadłospis</h5>
+          <p class="card-text small text-muted">Oficjalne zalecenia żywieniowe (PZH/NCEZ).</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://ncez.pzh.gov.pl/choroba-a-dieta/cukrzyca-typu-2-zalecenia-i-jadlospis-2/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Akademia NFZ – Cukrzyca (przegląd artykułów) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="cukrzyca nfz edukacja artykuły">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">NFZ</span>
+            <span class="badge text-bg-light border">Edukacja</span>
+          </div>
+          <h5 class="card-title mb-2">Akademia NFZ — Cukrzyca</h5>
+          <p class="card-text small text-muted">Zbiór prostych, rzetelnych materiałów edukacyjnych.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://akademia.nfz.gov.pl/kategoria-artykulow/cukrzyca/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pacjent.gov.pl – Nadciśnienie (artykuł) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="nadciśnienie objawy profilaktyka pacjent.gov.pl">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">Portal rządowy</span>
+            <span class="badge text-bg-light border">Nadciśnienie</span>
+          </div>
+          <h5 class="card-title mb-2">Nadciśnienie nie boli — badaj się</h5>
+          <p class="card-text small text-muted">Objawy, pomiary, programy profilaktyczne.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://pacjent.gov.pl/aktualnosc/nadcisnienie-tetnicze-nie-boli-badaj-sie-regularnie"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pacjent.gov.pl – Ciśnienie pod kontrolą -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="nadciśnienie aktywność styl życia pacjent.gov.pl">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">Portal rządowy</span>
+            <span class="badge text-bg-light border">Styl życia</span>
+          </div>
+          <h5 class="card-title mb-2">Ciśnienie pod kontrolą</h5>
+          <p class="card-text small text-muted">Ruch, dieta i codzienne nawyki obniżające ciśnienie.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://pacjent.gov.pl/zapobiegaj/cisnienie-pod-kontrola"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- NFZ Diety – DASH (PDF) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="nadciśnienie dieta dash plan posiłków nfz pdf">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">NFZ</span>
+            <span class="badge text-bg-light border">DASH · PDF</span>
+          </div>
+          <h5 class="card-title mb-2">DASH — 3-dniowy przykładowy jadłospis</h5>
+          <p class="card-text small text-muted">Oficjalny plan żywieniowy NFZ do pobrania.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://diety.nfz.gov.pl/images/plany_pdf/Dieta%20Nadci%C5%9Bnienie%20-%20pr%C3%B3bny%20plan%20na%203%20dni.pdf"
+             target="_blank" rel="noopener noreferrer">Pobierz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- NCEZ PZH – Nadciśnienie (zalecenia + jadłospis) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="nadciśnienie dieta pzh ncez jadłospis">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-success">Instytut państwowy</span>
+            <span class="badge text-bg-light border">Dieta</span>
+          </div>
+          <h5 class="card-title mb-2">Nadciśnienie — zalecenia i jadłospis</h5>
+          <p class="card-text small text-muted">Zalecenia żywieniowe i przykłady posiłków.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://ncez.pzh.gov.pl/choroba-a-dieta/choroby-ukladu-krazenia/nadcisnienie-tetnicze-zalecenia-i-jadlospis/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PTK/ESC 2024 – wytyczne nadciśnienia -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="wytyczne esc ptk nadciśnienie pdf lekarze">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-warning">Wytyczne</span>
+            <span class="badge text-bg-light border">Zaawansowane</span>
+          </div>
+          <h5 class="card-title mb-2">ESC 2024 – postępowanie w nadciśnieniu</h5>
+          <p class="card-text small text-muted">Oficjalne europejskie wytyczne (PTK).</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://ptkardio.pl/wytyczne/1-wytyczne_esc_2024_dotyczace_postepowania_w_podwyzszonym_cisnieniu_tetniczym_i_nadcisnieniu_tetniczym"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PTNT / Nadciśnienie Tętnicze w Praktyce – wytyczne 2024 -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="wytyczne ptnt nadciśnienie pdf lekarze">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-warning">Wytyczne</span>
+            <span class="badge text-bg-light border">Zaawansowane</span>
+          </div>
+          <h5 class="card-title mb-2">PTNT 2024 – wytyczne postępowania</h5>
+          <p class="card-text small text-muted">Polskie Towarzystwo Nadciśnienia Tętniczego.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://journals.viamedica.pl/nadcisnienie_tetnicze_w_praktyce/article/view/103769"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MP.pl – Nadciśnienie (kompendium pacjenta) -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="nadciśnienie mp.pl eksperci evidence-based">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-secondary">Artykuły eksperckie</span>
+            <span class="badge text-bg-light border">Nadciśnienie</span>
+          </div>
+          <h5 class="card-title mb-2">Nadciśnienie — kompendium (MP.pl)</h5>
+          <p class="card-text small text-muted">Przegląd zagadnień, pytania i odpowiedzi.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://www.mp.pl/pacjent/nadcisnienie/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mojacukrzyca.org – portal / materiały -->
+    <div class="col">
+      <div class="card shadow-sm h-100 resource-card"
+           data-tags="cukrzyca społeczność portal edukacja">
+        <div class="card-body">
+          <div class="badge-row d-flex align-items-center gap-2 mb-2">
+            <span class="badge text-bg-secondary">Portal pacjencki</span>
+            <span class="badge text-bg-light border">Cukrzyca</span>
+          </div>
+          <h5 class="card-title mb-2">Mojacukrzyca.org — materiały i aktualności</h5>
+          <p class="card-text small text-muted">Ogólnopolski portal dla diabetyków, edukacja i akcje.</p>
+          <a class="btn btn-cta w-100 cta mt-auto"
+             href="https://www.mojacukrzyca.org/"
+             target="_blank" rel="noopener noreferrer">Otwórz</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-center small text-muted mt-4 mb-0">
+    Linki otwierają się w nowej karcie. Wytyczne oznaczone jako „Zaawansowane” są pisane głównie dla profesjonalistów.
+  </p>
+</div>
+{% endblock %}

@@ -200,3 +200,8 @@ def sos_alert(request):
             messages.error(request, f"Nie udało się wysłać alertu SOS e-mailem. {email_reason}")
 
     return redirect("dashboard")
+
+
+@login_required
+def forums(request):
+    return render(request, "core/forums.html")

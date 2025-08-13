@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_cron",
     "reminders",
     "accounts",
+    "records",
 ]
 
 MIDDLEWARE = [
@@ -131,6 +132,10 @@ AUTH_USER_MODEL = 'core.CustomUser'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [ BASE_DIR / 'core' / 'static' ]
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Default primary key field type

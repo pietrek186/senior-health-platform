@@ -14,7 +14,6 @@ urlpatterns = [
     path('medicine/', views.placeholder, name='medicine'),
     path('reminders/', views.placeholder, name='reminders'),
     path('clinics/', views.placeholder, name='clinics'),
-    path('forums/', views.placeholder, name='forums'),
     path('results/', views.select_results, name='select_results'),
     path('results/pressure/', views.pressure_results, name='pressure_results'),
     path('settings/', views.placeholder, name='settings'),
@@ -23,4 +22,5 @@ urlpatterns = [
     path('test-alerts/', views.test_alerts),
     path('reminders/', include('reminders.urls')),
     path('sos/', views.sos_alert, name='sos_alert'),
+    path("forums/", views.forums, name="forums"),
 ]

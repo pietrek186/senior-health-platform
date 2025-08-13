@@ -57,8 +57,11 @@
           <tr>
             <td>
               {{ med.name }}
-              {% if med.is_running_low %}
-                <i class="bi bi-exclamation-triangle-fill text-warning ms-1" title="Niski stan (≤30%)"></i>
+              {# IKONKI: kolejność ważności — out ma pierwszeństwo nad low #}
+              {% if med.is_out %}
+                <i class="bi bi-exclamation-octagon-fill text-danger ms-1" title="Skończył się (0%)"></i>
+              {% elif med.is_running_low %}
+                <i class="bi bi-exclamation-triangle-fill text-warning ms-1" title="Kończy się (≤30%)"></i>
               {% endif %}
               {% if med.is_expiring_soon %}
                 <i class="bi bi-hourglass-split text-warning ms-1" title="Ważność upływa w ≤7 dni"></i>
@@ -85,9 +88,8 @@
             <td>
               {% if med.is_expired %}
                 <span class="text-danger fw-bold">Przeterminowany</span>
-              {% elif med.is_running_low and med.is_expiring_soon %}
-                <span class="text-warning fw-bold d-block">Kończy się</span>
-                <small class="text-warning">Ważność wkrótce (≤7 dni)</small>
+              {% elif med.is_out %}
+                <span class="text-danger fw-bold">Skończył się</span>
               {% elif med.is_running_low %}
                 <span class="text-warning fw-bold">Kończy się</span>
               {% elif med.is_expiring_soon %}
@@ -141,7 +143,7 @@ $(function() {
       "processing": "Przetwarzanie..."
     },
     dom: 'lrtip',
-    order: [],          // <--- ważne: NIE sortuj po kliencie, zostaw kolejność z widoku (-created_at)
+    order: [],          // NIE sortuj automatycznie – zachowaj kolejność z widoku
     pageLength: 10
   });
 

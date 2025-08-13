@@ -32,7 +32,6 @@ class Medication(models.Model):
     def estimated_end_date(self):
         """Zwraca datę wyczerpania zapasu (przybliżenie)."""
         if self.form == self.FORM_TABLET:
-            # liczba dni na podstawie całkowitej ilości i dziennego zużycia
             daily = (self.dosage_amount or 1) * (self.frequency or 1)
             days = self.quantity // daily if daily else 0
         else:  # syrop
@@ -63,12 +62,10 @@ class Medication(models.Model):
         na podstawie dawki (dosage_amount / dosage_ml_per_time) i frequency.
         """
         if not self.start_date:
-            # Brak daty startu – nie odejmujemy zużycia
             return self.volume_ml if self.form == self.FORM_SYRUP else self.quantity
 
         days_used = (date.today() - self.start_date).days
         if days_used < 0:
-            # Jeszcze nie zaczął – nic nie zużyte
             return self.volume_ml if self.form == self.FORM_SYRUP else self.quantity
 
         if self.form == self.FORM_TABLET:
@@ -83,6 +80,10 @@ class Medication(models.Model):
             return max((self.volume_ml or 0) - used_ml, 0)
 
         return self.quantity
+
+    def is_out(self):
+        """True, gdy zapas dokładnie się skończył (0)."""
+        return (self.remaining_quantity or 0) <= 0
 
     def is_running_low(self):
         """
@@ -99,3 +100,27 @@ class Medication(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.user.email})"
+
+
+class MedicationNotificationLog(models.Model):
+    """
+    Minimalny dzienny log wysłania powiadomień dla użytkownika.
+    Dzięki unikalności (user, date) zapobiegamy podwójnej wysyłce,
+    nawet jeśli zadanie uruchomi się dwa razy.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='medication_notification_logs'
+    )
+    date = models.DateField()  # lokalna data „dzisiejsza”
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'date')
+        indexes = [
+            models.Index(fields=['user', 'date']),
+        ]
+
+    def __str__(self):
+        return f"Notifications sent for {self.user.email} on {self.date}"

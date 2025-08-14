@@ -1,0 +1,413 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Przychodnie{% endblock %}
+
+{% block content %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    /* Ciemny przycisk z przejściem na niebieski przy hover/active */
+    .btn-dark-blue{
+      background-color:#212529;
+      color:#fff;
+      border-color:#212529;
+      transition:background-color .2s, border-color .2s, color .2s;
+    }
+    .btn-dark-blue:hover, .btn-dark-blue:focus,
+    .btn-dark-blue.active{
+      background-color:#0d6efd;
+      border-color:#0d6efd;
+      color:#fff;
+    }
+    .btn-dark-blue:disabled{opacity:.65}
+
+    /* Pagination pill – styl jak na screenie */
+    .pagination-pill{
+      display:inline-flex;
+      align-items:center;
+      background:#eef4fb;
+      border:1px solid #d6e2f1;
+      border-radius:6px;
+      overflow:hidden;
+      box-shadow:0 2px 4px rgba(0,0,0,.04) inset;
+    }
+    .pagination-pill .pill-btn{
+      border:0;
+      background:transparent;
+      padding:.45rem .7rem;
+      font-size:.95rem;
+      line-height:1;
+      user-select:none;
+      border-left:1px solid rgba(0,0,0,.06);
+    }
+    .pagination-pill .pill-btn:first-child{ border-left:0; }
+    .pagination-pill .pill-btn.page{ color:#212529; }
+    .pagination-pill .pill-btn.prev{ color:#6c757d; }
+    .pagination-pill .pill-btn.next{ color:#0d6efd; }
+    .pagination-pill .pill-btn.active{
+      background:#0d6efd; color:#fff;
+    }
+    .pagination-pill .pill-btn.disabled{
+      color:#adb5bd; pointer-events:none;
+    }
+  </style>
+
+  <div class="container mt-4">
+    <h1 class="text-center mb-1">Wyszukaj przychodnie</h1>
+    <p class="text-center text-muted mb-3">
+      Wpisz adres lub użyj bieżącej lokalizacji. Wybierz promień i filtr specjalizacji.
+    </p>
+
+    <div class="d-flex flex-wrap justify-content-center gap-2 p-3 rounded"
+         style="background:#f7fbff;border:1px solid #a3c9ff;box-shadow:0 6px 20px rgba(0,0,0,.05);">
+      <input id="address" type="text" class="form-control" style="max-width:360px"
+             placeholder="np. Franklina Roosevelta 40, Zabrze">
+      <select id="radius" class="form-select" style="max-width:140px">
+        <option value="10">10 km</option>
+        <option value="15">15 km</option>
+        <option value="20" selected>20 km</option>
+        <option value="30">30 km</option>
+        <option value="50">50 km</option>
+      </select>
+      <select id="filter" class="form-select" style="max-width:260px">
+        <option value="diabetologist" selected>Diabetolog</option>
+        <option value="cardiologist">Kardiolog</option>
+        <option value="general">Wszystkie przychodnie i lekarze</option>
+      </select>
+      <button class="btn btn-dark-blue" id="searchBtn">Szukaj</button>
+      <button class="btn btn-dark-blue" id="geoBtn">Użyj mojej lokalizacji</button>
+    </div>
+
+    <div id="map" class="mt-3" style="height:64vh;width:100%; border-radius:16px; border:1px solid #a3c9ff;
+         box-shadow:0 10px 24px rgba(0,0,0,.06);"></div>
+
+    <!-- Pasek „Pokaż N wyników” -->
+    <div id="resultsTop" class="d-flex align-items-center gap-2 mt-3 p-2 rounded"
+         style="background:#d6ebff;border:1px solid #a3c9ff;display:none;">
+      <span>Pokaż</span>
+      <select id="pageSize" class="form-select form-select-sm" style="width:auto;">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+      <span>wyników</span>
+    </div>
+
+    <div id="results" class="mt-2 p-3 rounded"
+         style="background:#f7fbff;border:1px solid #a3c9ff;box-shadow:0 6px 20px rgba(0,0,0,.05);" hidden>
+    </div>
+
+    <!-- Pasek paginacji (pastylka) -->
+    <div id="resultsBottom" class="d-flex justify-content-between align-items-center mt-2 p-2 rounded"
+         style="background:#d6ebff;border:1px solid #a3c9ff;display:none;">
+      <div id="pageInfo" class="text-muted">Wyświetlanie od …</div>
+      <div class="d-flex align-items-center">
+        <div id="pagination" class="pagination-pill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // --- MAPA ---
+    const map = L.map('map').setView([52.1, 19.4], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    let userMarker = null;
+    let radiusCircle = null;       // promień wyszukiwania
+    let locAccuracyCircle = null;  // okrąg dokładności (jeśli dostępny)
+    let markersLayer = L.layerGroup().addTo(map);
+
+    let currentData = null;     // GeoJSON z API
+    let currentCenter = null;   // [lat, lon]
+    let pageSize = 10;
+    let currentPage = 1;
+
+    function setUserPoint(lat, lon, label="Wybrany punkt", accMeters=null){
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.marker([lat, lon], { title: label }).addTo(map).bindPopup(label).openPopup();
+
+      const km = parseFloat(document.getElementById("radius").value);
+      const meters = km * 1000;
+      if (radiusCircle) map.removeLayer(radiusCircle);
+      radiusCircle = L.circle([lat, lon], { radius: meters, fillOpacity: 0.07, weight: 1 });
+      radiusCircle.addTo(map);
+
+      if (locAccuracyCircle) map.removeLayer(locAccuracyCircle);
+      if (accMeters && accMeters > 0){
+        locAccuracyCircle = L.circle([lat, lon], {
+          radius: accMeters, color:'#0d6efd', weight:1, fillColor:'#0d6efd', fillOpacity:.08
+        }).addTo(map);
+      }
+
+      map.fitBounds(radiusCircle.getBounds().pad(0.2));
+    }
+
+    document.getElementById("radius").addEventListener("change", () => {
+      if (!userMarker) return;
+      const { lat, lng } = userMarker.getLatLng();
+      const acc = locAccuracyCircle ? locAccuracyCircle.getRadius() : null;
+      setUserPoint(lat, lng, userMarker.getPopup()?.getContent() || "Wybrany punkt", acc);
+    });
+
+    // --- API HELPERS ---
+    async function geocode(q){
+      const url = new URL("{% url 'api_geocode' %}", window.location.origin);
+      url.searchParams.set("query", q);
+      const r = await fetch(url);
+      return r.json();
+    }
+
+    async function fetchClinics(lat, lon, radius_km, filter){
+      const url = new URL("{% url 'api_clinics' %}", window.location.origin);
+      url.searchParams.set("lat", lat);
+      url.searchParams.set("lon", lon);
+      url.searchParams.set("radius_km", radius_km);
+      url.searchParams.set("filter", filter);
+      const r = await fetch(url);
+      return r.json();
+    }
+
+    async function fetchReverse(lat, lon){
+      const url = new URL("{% url 'api_reverse' %}", window.location.origin);
+      url.searchParams.set("lat", lat);
+      url.searchParams.set("lon", lon);
+      const r = await fetch(url);
+      return r.json();
+    }
+
+    function km(v){ return (Math.round(v*100)/100).toFixed(2); }
+    function scrollToMap(){ document.getElementById("map").scrollIntoView({behavior:"smooth", block:"start"}); }
+    function showTopBar(v){ document.getElementById("resultsTop").style.display = v ? "flex" : "none"; }
+    function showBottomBar(v){ document.getElementById("resultsBottom").style.display = v ? "flex" : "none"; }
+    function showList(html){ const box=document.getElementById("results"); box.hidden=false; box.innerHTML=html; }
+
+    function renderMarkers(geojson){
+      markersLayer.clearLayers();
+      const bounds = [];
+      geojson.features.forEach((f) => {
+        const [lon, lat] = f.geometry.coordinates;
+        const p = f.properties;
+        const name = p.name || "Placówka medyczna";
+        const addr = p.address ? `<div class="text-muted">${p.address}</div>` : "";
+        const spec = p.speciality ? `<div class="text-muted">Specjalność: ${p.speciality}</div>` : "";
+        const tel  = p.phone ? `<div>tel: ${p.phone}</div>` : "";
+        const www  = p.website ? `<div><a href="${p.website}" target="_blank" rel="noopener">Strona www</a></div>` : "";
+        const m = L.marker([lat, lon]).addTo(markersLayer);
+        m.bindPopup(`<b>${name}</b>${addr}${spec}${tel}${www}<div class="text-muted">${km(p.distance_km)} km</div>`);
+        bounds.push([lat, lon]);
+      });
+      if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.2));
+    }
+
+    // --- PAGINACJA: pastylka jak na screenie ---
+    function updatePaginationUI(total){
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      const start = (currentPage - 1) * pageSize + 1;
+      const end = Math.min(currentPage * pageSize, total);
+      document.getElementById("pageInfo").textContent =
+        `Wyświetlanie od ${start} do ${end} z ${total} wyników`;
+
+      const wrap = document.getElementById("pagination");
+      wrap.innerHTML = "";
+
+      const prev = document.createElement("button");
+      prev.className = "pill-btn prev" + (currentPage<=1 ? " disabled" : "");
+      prev.textContent = "Poprzednia";
+      prev.onclick = () => { if (currentPage>1){ currentPage--; renderResultsPage(); scrollToMap(); } };
+      wrap.appendChild(prev);
+
+      const totalPagesToShow = 7;
+      let left = Math.max(1, currentPage - 3);
+      let right = Math.min(totalPages, left + totalPagesToShow - 1);
+      left = Math.max(1, right - totalPagesToShow + 1);
+
+      for (let i=left; i<=right; i++){
+        const b = document.createElement("button");
+        b.className = "pill-btn page" + (i===currentPage ? " active" : "");
+        b.textContent = i;
+        b.onclick = () => { currentPage = i; renderResultsPage(); scrollToMap(); };
+        wrap.appendChild(b);
+      }
+
+      const next = document.createElement("button");
+      next.className = "pill-btn next" + (currentPage>=totalPages ? " disabled" : "");
+      next.textContent = "Następna";
+      next.onclick = () => { if (currentPage<totalPages){ currentPage++; renderResultsPage(); scrollToMap(); } };
+      wrap.appendChild(next);
+    }
+
+    async function fillMissingAddresses(){
+      const nodes = document.querySelectorAll('.addr[data-lat][data-lon]');
+      for (const el of nodes) {
+        const lat = parseFloat(el.getAttribute('data-lat'));
+        const lon = parseFloat(el.getAttribute('data-lon'));
+        try {
+          const resp = await fetchReverse(lat, lon);
+          if (resp.ok && resp.address) {
+            el.textContent = resp.address;
+            el.classList.remove('text-danger');
+            el.classList.add('text-muted');
+          } else {
+            el.textContent = "Adres niedostępny";
+            el.classList.add('text-danger');
+          }
+        } catch {
+          el.textContent = "Adres niedostępny";
+          el.classList.add('text-danger');
+        }
+        await new Promise(r => setTimeout(r, 200));
+      }
+    }
+
+    function renderResultsPage(){
+      if (!currentData) return;
+      const total = currentData.count;
+      if (total === 0){
+        showTopBar(false); showBottomBar(false);
+        showList('<div>Brak wyników w wybranym promieniu. Spróbuj zwiększyć promień albo wybierz filtr „Wszystkie”.</div>');
+        return;
+      }
+      const startIdx = (currentPage - 1) * pageSize;
+      const endIdx = Math.min(startIdx + pageSize, total);
+      const slice = currentData.features.slice(startIdx, endIdx);
+
+      const items = slice.map((f, i) => {
+        const idx = startIdx + i;
+        const [lon, lat] = f.geometry.coordinates;
+        const p = f.properties;
+        const name = p.name || "Placówka medyczna";
+        const addr = p.address
+          ? `<div class="text-muted">${p.address}</div>`
+          : `<div class="text-muted addr" data-lat="${lat}" data-lon="${lon}">Ładowanie adresu…</div>`;
+        const webOrSearch = p.website
+          ? ` | <a href="${p.website}" target="_blank" rel="noopener">www</a>`
+          : ` | <a href="${p.search_url}" target="_blank" rel="noopener">Szukaj</a>`;
+        const navOSM = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${currentCenter[0]}%2C${currentCenter[1]}%3B${lat}%2C${lon}`;
+
+        return `
+          <div class="py-2 border-bottom">
+            <div><b>${idx + 1}. ${name}</b> — ${km(p.distance_km)} km</div>
+            ${addr}
+            <div class="small">
+              ${p.speciality ? `Specjalność: ${p.speciality}` : "Specjalność: —"}
+              ${p.phone ? ` | tel: ${p.phone}` : ""}
+              ${webOrSearch} | <a href="${navOSM}" target="_blank" rel="noopener">Nawiguj</a>
+            </div>
+            <button class="btn btn-sm btn-dark-blue mt-1" onclick="focusMarker(${lat},${lon})">Pokaż na mapie</button>
+          </div>
+        `;
+      });
+
+      showList(items.join(""));
+      showTopBar(true); showBottomBar(true);
+      updatePaginationUI(total);
+      fillMissingAddresses();
+    }
+
+    function renderResults(geojson, centerLat, centerLon){
+      currentData = geojson;
+      currentCenter = [centerLat, centerLon];
+      currentPage = 1;
+      renderMarkers(geojson);
+      renderResultsPage();
+      const ps = document.getElementById("pageSize");
+      if (ps) ps.value = String(pageSize);
+    }
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>> DODANE: funkcja focusMarker <<<<<<<<<<<<<<<<<<<<<<<<<<
+    window.focusMarker = (lat, lon) => {
+      // przybliż do markera i otwórz jego popup
+      const target = L.latLng(lat, lon);
+      const zoom = Math.max(map.getZoom(), 14);
+      map.setView(target, zoom, { animate: true });
+
+      let opened = false;
+      markersLayer.eachLayer(layer => {
+        if (layer.getLatLng && Math.abs(layer.getLatLng().lat - lat) < 1e-6
+            && Math.abs(layer.getLatLng().lng - lon) < 1e-6) {
+          layer.openPopup();
+          opened = true;
+        }
+      });
+      // przewiń do mapy za każdym razem
+      scrollToMap();
+    };
+    // >>>>>>>>>>>>>>>>>>>>>>>> KONIEC: funkcja focusMarker <<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    // --- HANDLER „Pokaż N wyników” (fix) ---
+    function handlePageSize(e){
+      const v = parseInt(e.target.value, 10);
+      if (!isNaN(v) && v > 0){
+        pageSize = v;
+        currentPage = 1;
+        renderResultsPage();
+        scrollToMap();
+      }
+    }
+    const pageSizeSel = document.getElementById("pageSize");
+    if (pageSizeSel){
+      pageSizeSel.addEventListener("change", handlePageSize);
+      pageSizeSel.addEventListener("input", handlePageSize);
+    }
+
+    // --- AKCJE ---
+    async function onSearchByAddress(){
+      const q = document.getElementById("address").value.trim();
+      if (!q) { alert("Podaj adres."); return; }
+      showList('<div>Szukanie adresu…</div>');
+      const g = await geocode(q);
+      if (!g.ok){ showList('<div>Nie znaleziono adresu.</div>'); showTopBar(false); showBottomBar(false); return; }
+
+      setUserPoint(g.lat, g.lon, g.display_name || "Wybrany punkt", null);
+
+      const radius = document.getElementById("radius").value;
+      let filter = document.getElementById("filter").value;
+      showList('<div>Wyszukuję placówki…</div>');
+      let data = await fetchClinics(g.lat, g.lon, radius, filter);
+
+      if ((!data.ok || data.count === 0) && filter !== "general") {
+        showList('<div>Brak wyników dla wybranego filtra. Przełączam na „Wszystkie”…</div>');
+        data = await fetchClinics(g.lat, g.lon, radius, "general");
+        document.getElementById("filter").value = "general";
+      }
+
+      renderResults(data, g.lat, g.lon);
+    }
+
+    async function onUseGeolocation(){
+      if (!navigator.geolocation){ alert("Brak wsparcia geolokalizacji w przeglądarce."); return; }
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const acc = pos.coords.accuracy || null;
+
+        setUserPoint(lat, lon, acc ? `Twoja lokalizacja (±${Math.round(acc)} m)` : "Twoja lokalizacja", acc);
+
+        const radius = document.getElementById("radius").value;
+        let filter = document.getElementById("filter").value;
+        showList('<div>Wyszukuję placówki…</div>');
+        let data = await fetchClinics(lat, lon, radius, filter);
+
+        if ((!data.ok || data.count === 0) && filter !== "general") {
+          showList('<div>Brak wyników dla wybranego filtra. Przełączam na „Wszystkie”…</div>');
+          data = await fetchClinics(lat, lon, radius, "general");
+          document.getElementById("filter").value = "general";
+        }
+
+        renderResults(data, lat, lon);
+      }, (err) => {
+        alert("Nie udało się pobrać lokalizacji: " + err.message);
+        showTopBar(false); showBottomBar(false);
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", onSearchByAddress);
+    document.getElementById("geoBtn").addEventListener("click", onUseGeolocation);
+    document.getElementById("address").addEventListener("keydown", e => { if (e.key === "Enter") onSearchByAddress(); });
+  </script>
+{% endblock %}

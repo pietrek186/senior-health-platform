@@ -205,3 +205,8 @@ def sos_alert(request):
 @login_required
 def forums(request):
     return render(request, "core/forums.html")
+
+
+@login_required
+def clinics_view(request):
+    return render(request, "core/clinics.html")

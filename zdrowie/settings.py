@@ -172,3 +172,6 @@ SOS_SMS_ENABLED = False ### WAŻNE Jak zmienię na True, to wyśle się normalni
 
 # (opcjonalnie) awaryjny adres, jeśli user nie ma guardian_email
 DEFAULT_GUARDIAN_EMAIL = os.environ.get("DEFAULT_GUARDIAN_EMAIL")
+
+
+OSM_USER_AGENT = "ZdrowieApp/1.0 (zdrowieapp2025@gmail.com)"

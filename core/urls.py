@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import render
 from django.urls import path, include
 from .views import test_email  # dopasuj ścieżkę do lokalizacji pliku
+from . import api
 
 
 urlpatterns = [
@@ -13,7 +14,6 @@ urlpatterns = [
     path('glucose/', views.placeholder, name='glucose'),
     path('medicine/', views.placeholder, name='medicine'),
     path('reminders/', views.placeholder, name='reminders'),
-    path('clinics/', views.placeholder, name='clinics'),
     path('results/', views.select_results, name='select_results'),
     path('results/pressure/', views.pressure_results, name='pressure_results'),
     path('settings/', views.placeholder, name='settings'),
@@ -23,4 +23,8 @@ urlpatterns = [
     path('reminders/', include('reminders.urls')),
     path('sos/', views.sos_alert, name='sos_alert'),
     path("forums/", views.forums, name="forums"),
+    path("clinics/", views.clinics_view, name="clinics"),
+    path("api/geocode", api.geocode, name="api_geocode"),
+    path("api/clinics", api.clinics, name="api_clinics"),
+    path("api/rev/", api.reverse_geocode, name="api_reverse"),
 ]

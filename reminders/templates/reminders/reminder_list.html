@@ -37,11 +37,8 @@
             <a href="{% url 'delete_reminder' reminder.id %}" class="btn btn-outline-danger btn-sm">Usuń</a>
           </td>
         </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="text-center">Brak przypomnień</td>
-        </tr>
         {% endfor %}
+        {# UWAGA: nie wstawiamy wiersza z colspan — DataTables samo pokaże emptyTable #}
       </tbody>
     </table>
   </div>
@@ -57,8 +54,10 @@
 <script>
   $(document).ready(function () {
     $('#remindersTable').DataTable({
-      searching: false,   // ← WYŁĄCZA pole „Szukaj”
+      order: [],          // zachowaj kolejność z serwera
+      searching: false,   // bez paska wyszukiwania
       language: {
+        emptyTable: "Brak przypomnień",               // <-- to pokaże się, gdy tabela pusta
         lengthMenu: "Pokaż _MENU_ wpisów na stronę",
         zeroRecords: "Brak wyników",
         info: "Strona _PAGE_ z _PAGES_",

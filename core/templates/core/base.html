@@ -45,9 +45,9 @@
                     </span>
                 </li>
 
-                <!-- Ikona WYNIKI: aktywna na wszystkich widokach glukozy/ciśnienia/BMI + select_results -->
+                <!-- Ikona WYNIKI: aktywna tylko na stronach z wynikami -->
                 <li class="nav-item mx-1">
-                    <a class="btn btn-outline-light rounded px-2 {% if request.resolver_match.url_name == 'select_results' or request.resolver_match.url_name == 'glucose' or request.resolver_match.url_name == 'glucose_results' or request.resolver_match.url_name == 'add_glucose' or request.resolver_match.url_name == 'edit_glucose' or request.resolver_match.url_name == 'delete_glucose' or request.resolver_match.url_name == 'export_glucose_csv' or request.resolver_match.url_name == 'pressure' or request.resolver_match.url_name == 'pressure_results' or request.resolver_match.url_name == 'edit_pressure' or request.resolver_match.url_name == 'delete_pressure' or request.resolver_match.url_name == 'bmi_form' or request.resolver_match.url_name == 'bmi_history' or request.resolver_match.url_name == 'delete_bmi_record' %}active{% endif %}"
+                    <a class="btn btn-outline-light rounded px-2 {% if request.resolver_match.url_name == 'select_results' or request.resolver_match.url_name == 'glucose_results' or request.resolver_match.url_name == 'pressure_results' or request.resolver_match.url_name == 'bmi_history' %}active{% endif %}"
                        href="{% url 'select_results' %}" title="Wyniki pomiarów">
                         <i class="bi bi-graph-up" style="font-size: 1.2rem;"></i>
                     </a>
@@ -61,7 +61,7 @@
                     </a>
                 </li>
 
-                <!-- Ikona USTAWIENIA: aktywna na settings / edit_user / edit_guardian -->
+                <!-- Ikona USTAWIENIA: aktywna tylko na settings / edit_user / edit_guardian -->
                 <li class="nav-item mx-1">
                     <a class="btn btn-outline-light rounded px-2 {% if request.resolver_match.url_name == 'settings' or request.resolver_match.url_name == 'edit_user' or request.resolver_match.url_name == 'edit_guardian' %}active{% endif %}"
                        href="{% url 'accounts:settings' %}" title="Ustawienia">

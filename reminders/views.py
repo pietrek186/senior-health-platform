@@ -5,6 +5,27 @@ from django.utils import timezone
 from datetime import datetime
 from .models import Reminder
 
+def _normalize_date_time(date_str: str, time_str: str):
+    """
+    Minimalna normalizacja wejścia z formularza, bez zmiany logiki:
+    - usuwamy spacje
+    - jeżeli przez błąd przeglądarki/IME data ma prefiks (np. '82025-12-18'),
+      bierzemy ostatnie 10 znaków 'YYYY-MM-DD'
+    - dla czasu zostawiamy pierwsze 5 znaków 'HH:MM'
+    """
+    ds = (date_str or "").strip()
+    ts = (time_str or "").strip()
+
+    if len(ds) > 10:
+        ds = ds[-10:]          # np. '82025-12-18' -> '2025-12-18'
+    if len(ts) > 5:
+        ts = ts[:5]            # np. '18:30:00' -> '18:30'
+
+    date_obj = datetime.strptime(ds, '%Y-%m-%d').date()
+    time_obj = datetime.strptime(ts, '%H:%M').time()
+    return date_obj, time_obj
+
+
 @login_required
 def add_reminder(request):
     if request.method == 'POST':
@@ -17,11 +38,11 @@ def add_reminder(request):
         else:
             recurrence = None
 
-        # >>> WAŻNE: parsowanie na obiekty date/time
-        date_str = request.POST.get('date')      # np. "2025-08-11"
-        time_str = request.POST.get('time')      # np. "16:30"
-        date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-        time_obj = datetime.strptime(time_str, '%H:%M').time()
+        # >>> Normalizacja i parsowanie date/time (odporne na dziwne prefiksy)
+        date_obj, time_obj = _normalize_date_time(
+            request.POST.get('date'),
+            request.POST.get('time')
+        )
 
         reminder = Reminder(
             title=title,
@@ -40,12 +61,14 @@ def add_reminder(request):
     return render(request, 'reminders/add_reminder.html')
 
 
-
-
 @login_required
 def reminder_list(request):
-    # POKAZUJEMY TYLKO AKTYWNE (żeby jednorazowe znikały po wysłaniu)
-    reminders = Reminder.objects.filter(user=request.user, is_active=True).order_by('next_run', 'date', 'time')
+    # Pokazujemy tylko aktywne i sortujemy NAJNOWSZE NA GÓRZE (po -id)
+    reminders = (
+        Reminder.objects
+        .filter(user=request.user, is_active=True)
+        .order_by('-id')
+    )
     return render(request, 'reminders/reminder_list.html', {'reminders': reminders})
 
 
@@ -62,11 +85,11 @@ def edit_reminder(request, reminder_id):
         else:
             recurrence = None
 
-        # >>> WAŻNE: parsowanie na obiekty date/time
-        date_str = request.POST.get('date')
-        time_str = request.POST.get('time')
-        date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-        time_obj = datetime.strptime(time_str, '%H:%M').time()
+        # >>> Normalizacja i parsowanie date/time (jak wyżej)
+        date_obj, time_obj = _normalize_date_time(
+            request.POST.get('date'),
+            request.POST.get('time')
+        )
 
         reminder.title = title
         reminder.date = date_obj

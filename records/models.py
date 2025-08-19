@@ -3,7 +3,6 @@ from django.conf import settings
 
 
 def medical_upload_to(instance, filename: str) -> str:
-    # media/medical_records/<user_id>/<yyyy>/<mm>/<plik>
     from datetime import datetime
     now = datetime.now()
     return f"medical_records/{instance.user_id}/{now:%Y}/{now:%m}/{filename}"
@@ -17,7 +16,7 @@ class MedicalFile(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-uploaded_at"]  # najnowsze u góry
+        ordering = ["-uploaded_at"]
 
     def __str__(self) -> str:
         return f"{self.original_name} ({self.user.email})"

@@ -1,27 +1,27 @@
-# Wirtualne środowiska
+#Wirtualne środowiska
 .venv/
 venv/
 
-# Baza SQLite
+#Baza SQLite
 db.sqlite3
 *.sqlite3
 
-# Pliki tymczasowe Pythona
+#Pliki tymczasowe Pythona
 __pycache__/
 **/__pycache__/
 *.py[cod]
 
-# Logi, systemowe
+#Logi, systemowe
 *.log
 .DS_Store
 
-# Sekrety
+#Sekrety
 .env
 
-# VS Code / IDE (opcjonalnie – jeśli nie chcesz dzielić ustawień)
+#VS Code / IDE
 .vscode/
 .idea/
 
-# Zebrane statyczne / media (jeśli kiedyś użyjesz collectstatic / uploadów)
+# Zebrane statyczne / media
 staticfiles/
 media/

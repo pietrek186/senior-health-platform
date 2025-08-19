@@ -11,7 +11,7 @@ class GlucoseMeasurementForm(forms.ModelForm):
                 'class': 'form-control'
             }),
             'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'value': forms.NumberInput(attrs={'class': 'form-control', 'min': 30, 'max': 600}),
+            'value': forms.NumberInput(attrs={'class': 'form-control', 'min': 30, 'max': 1000}),
         }
         labels = {
             'date': 'Data pomiaru',

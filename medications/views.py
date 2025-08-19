@@ -16,8 +16,6 @@ def add_medication(request):
             med = form.save(commit=False)
             med.user = request.user
 
-            # >>> KLUCZOWA ZMIANA: NIE PRZELICZAMY ILOŚCI.
-            # Zapisujemy dokładnie to, co podał użytkownik w formularzu.
             if med.form == Medication.FORM_TABLET:
                 med.quantity = form.cleaned_data.get('quantity') or 0
                 med.dosage_amount = form.cleaned_data.get('dosage_amount') or 1
@@ -27,7 +25,6 @@ def add_medication(request):
                 med.volume_ml = form.cleaned_data.get('volume_ml') or 0
                 med.dosage_ml_per_time = form.cleaned_data.get('dosage_ml_per_time') or 0
                 med.frequency = form.cleaned_data.get('frequency') or 1
-                # quantity dla syropu nie jest używane do obliczeń – ustaw na 0 dla porządku
                 med.quantity = 0
 
             med.save()
@@ -53,7 +50,6 @@ def edit_medication(request, pk):
     if request.method == 'POST':
         form = MedicationForm(request.POST, instance=med)
         if form.is_valid():
-            # >>> BEZ PRZELICZEŃ – zachowujemy to, co poda użytkownik.
             med = form.save(commit=False)
             med.user = request.user
 
@@ -70,7 +66,6 @@ def edit_medication(request, pk):
             messages.success(request, 'Lek został pomyślnie zaktualizowany.')
             return redirect('medication_list')
     else:
-        # Dla wygody – w polu ilości pokaż bieżący pozostały stan
         initial = {'form': med.form}
         if med.form == Medication.FORM_TABLET:
             initial['quantity'] = int(med.remaining_quantity or 0)

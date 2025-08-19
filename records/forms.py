@@ -11,5 +11,4 @@ class MedicalFileForm(forms.ModelForm):
 
     def clean_file(self):
         f = self.cleaned_data["file"]
-        # Akceptujemy wszystkie poprawne formaty; można dodać limit rozmiaru, jeśli zechcesz.
         return f

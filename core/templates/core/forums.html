@@ -3,45 +3,40 @@
 
 {% block content %}
 <style>
-  /* Wygląd kart – spójny z formularzami (jasnoniebieskie tło + niebieska ramka) */
   .resource-card {
-    background-color: #f0f8ff; /* tak jak w form-container */
-    border: 2px solid rgba(13,110,253,0.45) !important; /* delikatna niebieska ramka */
-    border-radius: 12px; /* równe z form-container */
+    background-color: #f0f8ff;
+    border: 2px solid rgba(13,110,253,0.45) !important;
+    border-radius: 12px;
     transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
   }
   .resource-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(13,110,253,0.15);
-    border-color: #0d6efd !important; /* primary na hover */
+    border-color: #0d6efd !important;
   }
 
-  /* Równe karty: treść układana kolumnowo, przycisk zawsze przy dole */
   .resource-card .card-body {
     display: flex;
     flex-direction: column;
   }
-  /* Rząd z badge’ami – stała wysokość, by tytuł startował z tej samej linii */
   .resource-card .badge-row {
     min-height: 32px;
   }
   .resource-card .card-text {
     margin-bottom: 0.75rem;
   }
-  /* Call-to-action dociśnięty do dołu */
   .resource-card .cta {
     margin-top: auto;
   }
 
-  /* Ciemny przycisk, który po najechaniu staje się niebieski */
   .btn-cta {
-    background-color: #212529; /* bootstrapowa czerń z btn-dark */
+    background-color: #212529;
     color: #fff;
     border-color: #212529;
   }
   .btn-cta:hover,
   .btn-cta:focus {
-    background-color: #0d6efd; /* primary */
+    background-color: #0d6efd;
     border-color: #0d6efd;
     color: #fff;
   }
@@ -90,7 +85,7 @@
             <span class="badge text-bg-primary">Forum</span>
             <span class="badge text-bg-light border">Nadciśnienie</span>
           </div>
-          <h5 class="card-title mb-2">ForumKardiologiczne – Nadciśnienie</h5>
+          <h5 class="card-title mb-2">Forum Kardiologiczne - Nadciśnienie</h5>
           <p class="card-text small text-muted">
             Wątki i dyskusje dotyczące nadciśnienia tętniczego.
           </p>

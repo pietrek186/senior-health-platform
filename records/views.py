@@ -8,13 +8,6 @@ from .models import MedicalFile
 
 @login_required
 def record_list(request):
-    """
-    Lista plików użytkownika + upload.
-    - Dostęp tylko dla zalogowanych.
-    - Zawsze zwracamy WYŁĄCZNIE pliki zalogowanego usera.
-    - Sortujemy od najnowszych.
-    - Opcjonalny filtr po nazwie (q) – zarówno GET, jak i filtr JS w szablonie.
-    """
     if request.method == "POST":
         form = MedicalFileForm(request.POST, request.FILES)
         if form.is_valid() and request.FILES.get("file"):
@@ -50,14 +43,9 @@ def record_list(request):
 
 @login_required
 def record_delete(request, pk: int):
-    """
-    Potwierdzenie usunięcia pliku z kartoteki (tylko właściciel).
-    Usuwa również fizyczny plik ze storage.
-    """
     obj = get_object_or_404(MedicalFile, pk=pk, user=request.user)
 
     if request.method == "POST":
-        # usuń plik fizyczny
         if obj.file:
             obj.file.delete(save=False)
         obj.delete()

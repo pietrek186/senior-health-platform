@@ -18,7 +18,7 @@ class ProfileUpdateForm(forms.ModelForm):
         label="Nazwisko",
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    # format zgodny z <input type="date"> + akceptacja polskiego zapisu
+    #Format zgodny z datą z inputa + akceptacja polskiego zapisu
     date_of_birth = forms.DateField(
         label="Data urodzenia",
         input_formats=["%Y-%m-%d", "%d.%m.%Y"],
@@ -65,7 +65,6 @@ class GuardianForm(forms.ModelForm):
         fields = ["guardian_email", "guardian_phone"]
 
     def __init__(self, *args, **kwargs):
-        # zapewnij automatyczne wczytanie numeru do pola
         instance = kwargs.get("instance")
         super().__init__(*args, **kwargs)
         if instance and getattr(instance, "guardian_phone", None):
@@ -108,7 +107,6 @@ class PasswordChangeOptionalForm(forms.Form):
         p1 = cleaned.get("new_password1")
         p2 = cleaned.get("new_password2")
 
-        # wymagamy kompletu nowych haseł
         if not p1 and not p2:
             self.add_error("new_password1", "Podaj nowe hasło.")
             self.add_error("new_password2", "Powtórz nowe hasło.")
@@ -126,13 +124,13 @@ class PasswordChangeOptionalForm(forms.Form):
             self.add_error("new_password2", "Hasła muszą być identyczne.")
             return cleaned
 
-        # nowe hasło nie może być takie samo jak stare
+        #Sprawdzenie czy nowe hasło nie jest starym hasłem
         if old and p1 == old:
             self.add_error("new_password1", "Nowe hasło nie może być takie samo jak aktualne.")
             self.add_error("new_password2", "Nowe hasło nie może być takie samo jak aktualne.")
             return cleaned
 
-        # walidacja siły hasła
+        #Walidacja hasła
         try:
             validate_password(p1, self.user)
         except forms.ValidationError as e:

@@ -1,14 +1,13 @@
 {% extends "core/base.html" %}
 {% block content %}
+
 <style>
-  .wrap { max-width: 660px; margin: 24px auto; } /* było 720px → 660px */
+  .wrap { max-width: 660px; margin: 24px auto; }
   .blue-frame { border: 2px solid rgba(13,110,253,.6); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
   .soft-bg { background-color: #eef6ff; }
   .panel { padding: 14px 16px 16px 16px; }
   .form-label { display:block; text-align:center; }
   .panel .form-control { padding: .6rem .8rem; font-size: 1rem; }
-
-  /* Zakładki „połączone” z kartą – wewnątrz panelu */
   .card-tabs { margin: 6px 0 8px; }
   .card-tabs .nav-link{
     border: 1px solid rgba(13,110,253,.25);
@@ -19,6 +18,7 @@
     color: #0d6efd;
     font-weight: 500;
   }
+
   .card-tabs .nav-link.active{
     background: #0d6efd;
     color: #fff;
@@ -33,7 +33,7 @@
   <div class="alert alert-info alert-dismissible fade show alert-sticky small text-center mb-3" role="alert">
     <i class="bi bi-info-circle me-1"></i>
     Wprowadź <strong>nowe wartości</strong> tylko w polach, które chcesz zaktualizować.
-    Zmiana hasła jest <strong>opcjonalna</strong> — wypełnij wszystkie pola hasła, jeśli chcesz je zmienić.
+    Zmiana hasła jest <strong>opcjonalna</strong> - wypełnij wszystkie pola hasła, jeśli chcesz je zmienić.
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 
@@ -98,7 +98,6 @@
       <div class="tab-pane fade {% if active_tab == 'password' %}show active{% endif %}" id="pane-password" role="tabpanel" aria-labelledby="tab-password">
         <form method="post" novalidate>
           {% csrf_token %}
-          {# nie renderujemy non_field_errors dla hasła #}
 
           <div class="mb-3">
             <label class="form-label">{{ pwd_form.old_password.label }}</label>

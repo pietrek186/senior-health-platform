@@ -67,7 +67,6 @@
     <p class="mb-4">Witaj w aplikacji! Wybierz funkcję:</p>
 
     <div class="sun-container">
-        <!-- SOS (POST + CSRF) -->
         <form method="post" action="{% url 'sos_alert' %}" class="d-inline"
               onsubmit="const btn=this.querySelector('button'); btn.disabled=true; btn.dataset.orig=btn.innerHTML; btn.innerHTML='Wysyłanie...';">
             {% csrf_token %}

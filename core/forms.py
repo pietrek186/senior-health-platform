@@ -27,7 +27,7 @@ class RegisterForm(UserCreationForm):
     )
     guardian_phone = forms.CharField(
         label="Telefon opiekuna",
-        required=True,  # Wymagane przy rejestracji (dla SOS/SMS)
+        required=True,
         help_text="Wpisz numer w formacie międzynarodowym, np. +48123123123.",
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "+48..."})
     )
@@ -46,7 +46,6 @@ class RegisterForm(UserCreationForm):
         )
 
     def clean_guardian_phone(self):
-        """Lekka normalizacja: usuń spacje i myślniki. Walidację formatu przeprowadza walidator modelu."""
         phone = self.cleaned_data.get("guardian_phone", "") or ""
         phone = phone.replace(" ", "").replace("-", "")
         return phone

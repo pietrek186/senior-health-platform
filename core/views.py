@@ -10,7 +10,6 @@ from medications.utils import send_medication_notifications
 from django.conf import settings
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-import requests
 
 
 def home(request):
@@ -46,23 +45,20 @@ def custom_logout(request):
 def dashboard(request):
     return render(request, 'core/dashboard.html')
 
-def placeholder(request):
-    return render(request, 'core/placeholder.html', {'section': request.path})
-
 @login_required
 def select_results(request):
     return render(request, 'core/select_results.html')
 
 @login_required
 def pressure_results(request):
-    return render(request, 'pressure/pressure_results.html')  # do stworzenia
+    return render(request, 'pressure/pressure_results.html')
 
 
 def test_email(request):
     send_mail(
         subject='Test e-maila z aplikacji Django',
         message='To jest wiadomość testowa wysłana z projektu ZdrowieApp.',
-        from_email=None,  # użyje DEFAULT_FROM_EMAIL z settings.py
+        from_email=None,
         recipient_list=['zdrowieapp2025@gmail.com'],
         fail_silently=False,
     )
@@ -83,7 +79,6 @@ def sos_alert(request):
     guardian_email = (getattr(user, "guardian_email", "") or "").strip()
     guardian_phone = (getattr(user, "guardian_phone", "") or "").strip()
 
-    # Awaryjny e-mail z settings, jeśli brak u użytkownika
     if not guardian_email:
         fallback = getattr(settings, "DEFAULT_GUARDIAN_EMAIL", "")
         if fallback:
@@ -93,14 +88,13 @@ def sos_alert(request):
     full_name = f"{(user.first_name or '').strip()} {(user.last_name or '').strip()}".strip()
     display_name = full_name if full_name else (user.email or "Użytkownik")
 
-    subject = "ALERT SOS – potrzebna pomoc"
+    subject = "ALERT SOS - potrzebna pomoc"
     body = (
         f"Użytkownik: {display_name} ({user.email})\n"
         f"Data i czas: {now.strftime('%Y-%m-%d %H:%M:%S %Z')}\n"
         "Komunikat: Użytkownik źle się poczuł i prosi o natychmiastowy kontakt/pomoc."
     )
 
-    # --- E-MAIL ---
     email_ok = False
     email_reason = ""
     if guardian_email:
@@ -120,7 +114,7 @@ def sos_alert(request):
     else:
         email_reason = "Brak adresu e-mail opiekuna."
 
-    # --- SMS (włączany tylko, gdy SOS_SMS_ENABLED=True) ---
+    #Działa tylko, gdy SOS_SMS_ENABLED=True
     sms_ok = False
     sms_reason = ""
     sms_attempted = False
@@ -137,7 +131,6 @@ def sos_alert(request):
             try:
                 url = "https://api.smsapi.pl/sms.do"
 
-                # Treść bez „prawdziwych linków”
                 safe_email = ""
                 if user.email:
                     safe_email = user.email.replace("@", " [at] ").replace(".", " [dot] ")
@@ -180,7 +173,6 @@ def sos_alert(request):
             except Exception as e:
                 sms_reason = f"Błąd SMS: {e}"
 
-    # --- Podsumowanie / komunikaty ---
     if sms_attempted:
         if email_ok and sms_ok:
             messages.success(request, "Wysłano alert SOS: e-mail i SMS.")
@@ -193,7 +185,6 @@ def sos_alert(request):
         else:
             messages.error(request, f"Nie udało się wysłać alertu SOS. {email_reason} {sms_reason}".strip())
     else:
-        # SMS wyłączony – traktujemy jak e-mail only
         if email_ok:
             messages.success(request, "Wysłano alert SOS e-mailem.")
         else:
@@ -205,7 +196,6 @@ def sos_alert(request):
 @login_required
 def forums(request):
     return render(request, "core/forums.html")
-
 
 @login_required
 def clinics_view(request):

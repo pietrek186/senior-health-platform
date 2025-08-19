@@ -14,10 +14,10 @@ def settings_select(request):
 @login_required
 def edit_user(request):
     user = request.user
-    active_tab = "profile"  # domyślna karta
+    active_tab = "profile"
 
     if request.method == "POST":
-        # Zapis danych podstawowych
+        #Zapis danych podstawowych
         if "profile_submit" in request.POST:
             profile_form = ProfileUpdateForm(request.POST, instance=user)
             pwd_form = PasswordChangeOptionalForm(user)
@@ -25,20 +25,18 @@ def edit_user(request):
             if profile_form.is_valid():
                 profile_form.save()
                 messages.success(request, "Dane zostały zaktualizowane.")
-                return redirect(request.path)  # sukces -> redirect
-            # przy błędach: bez redirectu, zostajemy na tej karcie
+                return redirect(request.path)
 
-        # Zmiana hasła
+        #Zmiana hasła
         elif "password_submit" in request.POST:
             profile_form = ProfileUpdateForm(instance=user)
             pwd_form = PasswordChangeOptionalForm(user, data=request.POST)
-            active_tab = "password"  # przy próbie zmiany hasła trzymaj tę kartę
+            active_tab = "password"
             if pwd_form.is_valid():
                 pwd_form.save()
-                update_session_auth_hash(request, user)  # nie wylogowuj po zmianie
+                update_session_auth_hash(request, user)
                 messages.success(request, "Hasło zostało zmienione.")
-                return redirect(request.path)  # sukces -> redirect
-            # przy błędach: bez redirectu, zostajemy na karcie hasła
+                return redirect(request.path)
 
         else:
             profile_form = ProfileUpdateForm(instance=user)
@@ -67,7 +65,6 @@ def edit_guardian(request):
             messages.success(request, "Dane opiekuna zostały zaktualizowane.")
             return redirect("accounts:edit_guardian")
     else:
-        # jawnie ustawiamy initial, żeby wartości zawsze się wypełniły
         form = GuardianForm(
             instance=request.user,
             initial={

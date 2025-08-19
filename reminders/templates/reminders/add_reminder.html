@@ -6,11 +6,11 @@
   .form-container {
     max-width: 700px;
     margin: 0 auto;
-    background-color: #f8fbff; /* delikatne białe z odcieniem niebieskiego */
+    background-color: #f8fbff;
     padding: 24px;
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: 2px solid #6cb2eb; /* wyraźniejsza niebieska ramka */
+    border: 2px solid #6cb2eb;
   }
   .form-row { margin-bottom: 1rem; }
   .form-label-center {
@@ -28,7 +28,6 @@
     <form method="post">
       {% csrf_token %}
 
-      <!-- Tytuł przypomnienia (lista + pole Inne) -->
       <div class="form-row">
         <label for="title_select" class="form-label-center">Tytuł przypomnienia:</label>
         <select id="title_select" name="title_select" class="form-select">
@@ -39,25 +38,21 @@
         </select>
       </div>
 
-      <!-- Własny tytuł -->
       <div class="form-row" id="custom_title_row" style="display: none;">
         <label for="custom_title" class="form-label-center">Wpisz własny tytuł:</label>
         <input type="text" name="custom_title" id="custom_title" class="form-control">
       </div>
 
-      <!-- Data -->
       <div class="form-row">
         <label for="date" class="form-label-center">Data:</label>
         <input type="date" name="date" id="date" class="form-control" required>
       </div>
 
-      <!-- Godzina -->
       <div class="form-row">
         <label for="time" class="form-label-center">Godzina:</label>
         <input type="time" name="time" id="time" class="form-control" required>
       </div>
 
-      <!-- Powtarzanie (switche) -->
       <div class="form-row">
         <span class="form-label-center">Powtarzanie:</span>
         <div class="d-flex flex-column align-items-center gap-2">

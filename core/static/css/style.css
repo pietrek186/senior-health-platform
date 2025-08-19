@@ -5,7 +5,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* Styl ramki formularza */
 .form-container {
     background-color: #f8f9fa;
     border: 2px solid #64b5f6;
@@ -18,7 +17,6 @@ body {
     text-align: center;
 }
 
-/* Styl .btn-outline-dark */
 .btn-outline-dark {
     color: #0d6efd;
     border-color: #0d6efd;
@@ -29,7 +27,6 @@ body {
     color: white;
 }
 
-/* WYMUSZONY styl .btn-dark */
 .btn-dark {
     background-color: #212529 !important;
     color: #ffffff !important;
@@ -42,7 +39,6 @@ body {
     color: #ffffff !important;
 }
 
-/* WYMUSZONY styl .btn-secondary */
 .btn-secondary {
     background-color: #6c757d !important;
     color: #ffffff !important;
@@ -55,7 +51,6 @@ body {
     color: #ffffff !important;
 }
 
-/* Styl przycisku "Usuń" – czerwony kolor po hoverze */
 .btn-outline-danger {
     color: #dc3545;
     border-color: #dc3545;
@@ -66,7 +61,6 @@ body {
     color: white !important;
 }
 
-/* Stopka – kolor i cień na górze */
 footer {
     background: linear-gradient(to right, #90caf9, #e3f2fd);
     border-top: 1px solid #64b5f6;

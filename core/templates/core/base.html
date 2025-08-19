@@ -6,21 +6,17 @@
     <title>{% block title %}Zdrowie{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <!-- Twój styl -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<!-- Pasek nawigacyjny -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Zdrowie</a>
+        <a class="navbar-brand">Zdrowie</a>
 
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -33,7 +29,6 @@
 
             {% if user.is_authenticated and request.resolver_match.url_name != "login" and request.resolver_match.url_name != "register" %}
             <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
-                <!-- e-mail zalogowanego -->
                 <li class="nav-item mx-2">
                     <span class="navbar-text d-flex align-items-center gap-2">
                         <i class="bi bi-person-circle opacity-75" style="font-size:1.1rem;"></i>
@@ -45,7 +40,7 @@
                     </span>
                 </li>
 
-                <!-- Ikona WYNIKI: aktywna tylko na stronach z wynikami -->
+                <!-- Ikona WYNIKI -->
                 <li class="nav-item mx-1">
                     <a class="btn btn-outline-light rounded px-2 {% if request.resolver_match.url_name == 'select_results' or request.resolver_match.url_name == 'glucose_results' or request.resolver_match.url_name == 'pressure_results' or request.resolver_match.url_name == 'bmi_history' %}active{% endif %}"
                        href="{% url 'select_results' %}" title="Wyniki pomiarów">
@@ -53,7 +48,7 @@
                     </a>
                 </li>
 
-                <!-- Ikona KARTOTEKA: aktywna na każdej ścieżce /records/... -->
+                <!-- Ikona KARTOTEKA -->
                 <li class="nav-item mx-1">
                     <a class="btn btn-outline-light rounded px-2 {% if '/records/' in request.path %}active{% endif %}"
                        href="{% url 'records:list' %}" title="Kartoteka medyczna">
@@ -61,7 +56,7 @@
                     </a>
                 </li>
 
-                <!-- Ikona USTAWIENIA: aktywna tylko na settings / edit_user / edit_guardian -->
+                <!-- Ikona USTAWIENIA -->
                 <li class="nav-item mx-1">
                     <a class="btn btn-outline-light rounded px-2 {% if request.resolver_match.url_name == 'settings' or request.resolver_match.url_name == 'edit_user' or request.resolver_match.url_name == 'edit_guardian' %}active{% endif %}"
                        href="{% url 'accounts:settings' %}" title="Ustawienia">
@@ -92,22 +87,17 @@
 </div>
 {% endif %}
 
-<!-- Główna zawartość -->
 <div class="flex-grow-1">
     {% block content %}{% endblock %}
 </div>
 
-<!-- Stopka -->
 <footer class="bg-light text-center text-muted py-3 mt-auto">
     <small>&copy; 2025 Twoja aplikacja zdrowotna</small>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  // Automatyczne znikanie alertów po 4 sekundach,
-  // ale nie tych z identyfikatorem "bmi-note" ANI z klasą "alert-sticky"
   setTimeout(function () {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(function (alert) {

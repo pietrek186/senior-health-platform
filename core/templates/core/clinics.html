@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    /* Ciemny przycisk z przejściem na niebieski przy hover/active */
     .btn-dark-blue{
       background-color:#212529;
       color:#fff;
@@ -22,7 +21,6 @@
     }
     .btn-dark-blue:disabled{opacity:.65}
 
-    /* Pagination pill – styl jak na screenie */
     .pagination-pill{
       display:inline-flex;
       align-items:center;
@@ -82,7 +80,6 @@
     <div id="map" class="mt-3" style="height:64vh;width:100%; border-radius:16px; border:1px solid #a3c9ff;
          box-shadow:0 10px 24px rgba(0,0,0,.06);"></div>
 
-    <!-- Pasek „Pokaż N wyników” -->
     <div id="resultsTop" class="d-flex align-items-center gap-2 mt-3 p-2 rounded"
          style="background:#d6ebff;border:1px solid #a3c9ff;display:none;">
       <span>Pokaż</span>
@@ -99,7 +96,6 @@
          style="background:#f7fbff;border:1px solid #a3c9ff;box-shadow:0 6px 20px rgba(0,0,0,.05);" hidden>
     </div>
 
-    <!-- Pasek paginacji (pastylka) -->
     <div id="resultsBottom" class="d-flex justify-content-between align-items-center mt-2 p-2 rounded"
          style="background:#d6ebff;border:1px solid #a3c9ff;display:none;">
       <div id="pageInfo" class="text-muted">Wyświetlanie od …</div>
@@ -111,19 +107,18 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // --- MAPA ---
     const map = L.map('map').setView([52.1, 19.4], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
     let userMarker = null;
-    let radiusCircle = null;       // promień wyszukiwania
-    let locAccuracyCircle = null;  // okrąg dokładności (jeśli dostępny)
+    let radiusCircle = null;
+    let locAccuracyCircle = null;
     let markersLayer = L.layerGroup().addTo(map);
 
-    let currentData = null;     // GeoJSON z API
-    let currentCenter = null;   // [lat, lon]
+    let currentData = null;
+    let currentCenter = null; //[lat, lon]
     let pageSize = 10;
     let currentPage = 1;
 
@@ -154,7 +149,6 @@
       setUserPoint(lat, lng, userMarker.getPopup()?.getContent() || "Wybrany punkt", acc);
     });
 
-    // --- API HELPERS ---
     async function geocode(q){
       const url = new URL("{% url 'api_geocode' %}", window.location.origin);
       url.searchParams.set("query", q);
@@ -204,7 +198,6 @@
       if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.2));
     }
 
-    // --- PAGINACJA: pastylka jak na screenie ---
     function updatePaginationUI(total){
       const totalPages = Math.max(1, Math.ceil(total / pageSize));
       const start = (currentPage - 1) * pageSize + 1;
@@ -319,9 +312,7 @@
       if (ps) ps.value = String(pageSize);
     }
 
-    // >>>>>>>>>>>>>>>>>>>>>>>>>> DODANE: funkcja focusMarker <<<<<<<<<<<<<<<<<<<<<<<<<<
     window.focusMarker = (lat, lon) => {
-      // przybliż do markera i otwórz jego popup
       const target = L.latLng(lat, lon);
       const zoom = Math.max(map.getZoom(), 14);
       map.setView(target, zoom, { animate: true });
@@ -334,12 +325,9 @@
           opened = true;
         }
       });
-      // przewiń do mapy za każdym razem
       scrollToMap();
     };
-    // >>>>>>>>>>>>>>>>>>>>>>>> KONIEC: funkcja focusMarker <<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    // --- HANDLER „Pokaż N wyników” (fix) ---
     function handlePageSize(e){
       const v = parseInt(e.target.value, 10);
       if (!isNaN(v) && v > 0){
@@ -355,7 +343,6 @@
       pageSizeSel.addEventListener("input", handlePageSize);
     }
 
-    // --- AKCJE ---
     async function onSearchByAddress(){
       const q = document.getElementById("address").value.trim();
       if (!q) { alert("Podaj adres."); return; }

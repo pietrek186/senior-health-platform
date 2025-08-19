@@ -65,7 +65,6 @@ def bmi_view(request):
                 category=category
             )
 
-            # Notatki i alerty dopasowane do kategorii
             notes = {
                 "Wygłodzenie": "Twoja masa ciała jest skrajnie niska, co może wskazywać na poważne niedożywienie. Skontaktuj się z lekarzem, aby ustalić przyczynę i wdrożyć leczenie.",
                 "Wychudzenie": "Twoja masa ciała jest zbyt niska. Może to prowadzić do osłabienia odporności i zaburzeń hormonalnych. Warto skonsultować się z dietetykiem lub lekarzem.",
@@ -111,7 +110,6 @@ def bmi_view(request):
 def bmi_history(request):
     records = BMIRecord.objects.filter(user=request.user).order_by('-created_at')
 
-    # Mapujemy kategorie na klasy CSS
     category_classes = {
         'Wygłodzenie': 'wyglodzenie',
         'Wychudzenie': 'wychudzenie',

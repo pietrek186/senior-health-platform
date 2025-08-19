@@ -8,10 +8,9 @@ from django.core.cache import cache
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_GET
 
-# User-Agent wymagany przez OSM/Nominatim/Overpass
 USER_AGENT = getattr(settings, "OSM_USER_AGENT", "ZdrowieApp/1.0 (kontakt@example.com)")
-CACHE_TTL = 60 * 10           # 10 min – dane placówek
-REVERSE_TTL = 60 * 60 * 24    # 24 h – cache reverse geocode
+CACHE_TTL = 60 * 10
+REVERSE_TTL = 60 * 60 * 24
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -50,11 +49,7 @@ def geocode(request):
     cache.set(cache_key, result, CACHE_TTL)
     return JsonResponse(result)
 
-
-# --------- Specjalności: tłumaczenia i heurystyki ---------
-
 SPECIALITY_PL = {
-    # kluczowe:
     "diabetology": "diabetologia",
     "endocrinology": "endokrynologia",
     "cardiology": "kardiologia",
@@ -62,7 +57,6 @@ SPECIALITY_PL = {
     "hypertensiology": "hipertensjologia",
     "internal": "choroby wewnętrzne",
     "internal_medicine": "choroby wewnętrzne",
-    # ogólne/częste:
     "family_medicine": "medycyna rodzinna",
     "general": "lekarz ogólny",
     "primary_care": "podstawowa opieka zdrowotna",
@@ -110,7 +104,6 @@ SPECIALITY_PL = {
     "birthing_centre": "centrum porodowe",
     "badania_ekg": "badania EKG",
     "badania_usg": "badania USG",
-    # czasem ktoś wpisze „clinic” jako speciality – przetłumaczmy sensownie:
     "clinic": "przychodnia",
     "hospital": "szpital",
 }
@@ -125,7 +118,6 @@ HEALTHCARE_TO_PL = {
 
 
 def translate_speciality_list(raw: str) -> str:
-    """Przetłumacz i sformatuj specjalności rozdzielone ; , lub |"""
     if not raw:
         return ""
     tokens = [t.strip().lower() for t in re.split(r"[;,\|]\s*", raw) if t.strip()]
@@ -134,7 +126,6 @@ def translate_speciality_list(raw: str) -> str:
     return ", ".join(unique)
 
 
-# 3 filtry: diabetolog, kardiolog, wszystkie
 FILTER_REGEX = {
     "diabetologist": "diabetology|endocrinology",
     "cardiologist": "cardiology|hypertension|hypertensiology",
@@ -143,7 +134,6 @@ FILTER_REGEX = {
 
 
 def reverse_address(lat: float, lon: float):
-    """Reverse geocode (cache). Zwraca dict: {'text': 'ulica nr, miasto, kod', 'city': 'miasto'}."""
     key = f"rev:{lat:.5f}:{lon:.5f}"
     cached = cache.get(key)
     if cached:
@@ -171,7 +161,6 @@ def reverse_address(lat: float, lon: float):
 
 @require_GET
 def reverse_geocode(request):
-    """Endpoint używany przez front do dociągnięcia adresu dla rekordów bez addr:*."""
     try:
         lat = float(request.GET.get("lat"))
         lon = float(request.GET.get("lon"))
@@ -254,7 +243,7 @@ def clinics(request):
         tags = el.get("tags", {})
         name = tags.get("name") or tags.get("official_name") or "Placówka medyczna"
 
-        # współrzędne
+        #Współrzędne
         if el["type"] == "node":
             clat, clon = el["lat"], el["lon"]
         else:
@@ -265,7 +254,6 @@ def clinics(request):
 
         distance = haversine_km(lat, lon, clat, clon)
 
-        # Adres z tagów
         city = tags.get("addr:city") or tags.get("addr:town") or tags.get("addr:suburb") or tags.get("addr:hamlet") or tags.get("addr:place")
         street = " ".join([v for v in [tags.get("addr:street"), tags.get("addr:housenumber")] if v])
         parts = []
@@ -274,7 +262,6 @@ def clinics(request):
         if tags.get("addr:postcode"): parts.append(tags.get("addr:postcode"))
         addr = ", ".join(parts) or tags.get("addr:full") or ""
 
-        # Specjalności
         spec_raw = (
             tags.get("healthcare:speciality") or tags.get("speciality") or
             tags.get("department") or tags.get("medical:department") or ""
@@ -289,7 +276,6 @@ def clinics(request):
         phone = tags.get("phone") or tags.get("contact:phone")
         website = tags.get("website") or tags.get("contact:website")
 
-        # Fallback www -> wyszukiwarka
         search_q = name + (f" {city}" if city else "")
         search_url = f"https://duckduckgo.com/?q={quote_plus(search_q)}"
 
@@ -298,13 +284,12 @@ def clinics(request):
             "geometry": {"type": "Point", "coordinates": [clon, clat]},
             "properties": {
                 "name": name,
-                "address": addr,                 # UWAGA: jeśli puste, front dociągnie reverse
+                "address": addr,
                 "distance_km": round(distance, 2),
                 "speciality": spec_pl,
                 "phone": phone,
                 "website": website,
                 "search_url": search_url,
-                # (bez OSM – usuwamy z listy/pop-upu)
             }
         })
 

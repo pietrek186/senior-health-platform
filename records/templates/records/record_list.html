@@ -2,7 +2,6 @@
 
 {% block content %}
 <style>
-  /* Przycisk na środku, niebieski, lekkie zacienienie po hoverze */
   .records-actions { text-align: center; }
   .records-actions .btn-primary{
     padding: .55rem 1.25rem;
@@ -14,17 +13,14 @@
     box-shadow: 0 4px 14px rgba(13,110,253,.28);
   }
 
-  /* Wyszukiwarka – szerokość jak wcześniej */
   .records-search { text-align: center; }
   .records-search .form-control{
     max-width: 380px;
     margin: 0 auto;
   }
 
-  /* Tabela: zawężona, schludna */
   .records-table-wrap { max-width: 960px; margin: 0 auto; }
 
-  /* Wyśrodkowane przyciski w kolumnie Akcje */
   td.actions-cell { text-align: center; }
   .actions-inline { display: inline-flex; gap: .5rem; }
 </style>
@@ -35,7 +31,6 @@
     Wgrywaj wyniki badań, wypisy, zdjęcia i inne dokumenty.
   </p>
 
-  <!-- PRZYCISK: środek, niebieski -->
   <div class="records-actions mb-3">
     <form method="post" enctype="multipart/form-data" id="uploadForm" class="d-inline-block m-0">
       {% csrf_token %}
@@ -44,7 +39,6 @@
     </form>
   </div>
 
-  <!-- FILTROWANIE po nazwie pliku -->
   <div class="records-search mb-3">
     <form method="get" class="m-0">
       <input
@@ -82,7 +76,6 @@
             </td>
           </tr>
           {% endfor %}
-          <!-- wiersz „brak wyników” pokazywany przez JS -->
           <tr id="noResultsRow" style="display:none;">
             <td colspan="2" class="text-center text-muted">Brak pliku o takiej nazwie.</td>
           </tr>
@@ -95,7 +88,6 @@
 </div>
 
 <script>
-  // „Dodaj plik” -> wybór pliku -> automatyczne wysłanie formularza
   const addBtn = document.getElementById('addFileBtn');
   const fileInput = document.getElementById('fileInput');
   const uploadForm = document.getElementById('uploadForm');
@@ -107,7 +99,6 @@
     });
   }
 
-  // Filtrowanie po nazwie + komunikat „brak wyników”
   (function(){
     const filterInput = document.getElementById('filterInput');
     const table = document.getElementById('filesTable');
@@ -130,7 +121,7 @@
       if (noRow) noRow.style.display = visible === 0 ? '' : 'none';
     }
     filterInput.addEventListener('input', applyFilter);
-    applyFilter(); // startowo (np. po GET ?q=)
+    applyFilter();
   })();
 </script>
 {% endblock %}

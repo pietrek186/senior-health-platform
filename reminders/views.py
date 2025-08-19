@@ -1,25 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils import timezone
 from datetime import datetime
 from .models import Reminder
 
 def _normalize_date_time(date_str: str, time_str: str):
-    """
-    Minimalna normalizacja wejścia z formularza, bez zmiany logiki:
-    - usuwamy spacje
-    - jeżeli przez błąd przeglądarki/IME data ma prefiks (np. '82025-12-18'),
-      bierzemy ostatnie 10 znaków 'YYYY-MM-DD'
-    - dla czasu zostawiamy pierwsze 5 znaków 'HH:MM'
-    """
     ds = (date_str or "").strip()
     ts = (time_str or "").strip()
 
     if len(ds) > 10:
-        ds = ds[-10:]          # np. '82025-12-18' -> '2025-12-18'
+        ds = ds[-10:]
     if len(ts) > 5:
-        ts = ts[:5]            # np. '18:30:00' -> '18:30'
+        ts = ts[:5]
 
     date_obj = datetime.strptime(ds, '%Y-%m-%d').date()
     time_obj = datetime.strptime(ts, '%H:%M').time()
@@ -38,7 +30,6 @@ def add_reminder(request):
         else:
             recurrence = None
 
-        # >>> Normalizacja i parsowanie date/time (odporne na dziwne prefiksy)
         date_obj, time_obj = _normalize_date_time(
             request.POST.get('date'),
             request.POST.get('time')
@@ -63,7 +54,6 @@ def add_reminder(request):
 
 @login_required
 def reminder_list(request):
-    # Pokazujemy tylko aktywne i sortujemy NAJNOWSZE NA GÓRZE (po -id)
     reminders = (
         Reminder.objects
         .filter(user=request.user, is_active=True)
@@ -85,7 +75,6 @@ def edit_reminder(request, reminder_id):
         else:
             recurrence = None
 
-        # >>> Normalizacja i parsowanie date/time (jak wyżej)
         date_obj, time_obj = _normalize_date_time(
             request.POST.get('date'),
             request.POST.get('time')
@@ -95,7 +84,6 @@ def edit_reminder(request, reminder_id):
         reminder.date = date_obj
         reminder.time = time_obj
         reminder.recurrence = recurrence
-        # po edycji przeliczamy „następny termin”
         reminder.next_run = reminder.compute_initial_next_run()
         reminder.is_active = True
         reminder.save()

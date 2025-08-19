@@ -5,13 +5,11 @@
 <div class="container mt-5">
   <h2 class="text-center mb-4">Moja apteczka</h2>
 
-  {# — tutaj przycisk Dodaj nowy lek — #}
   <div class="text-center mb-3">
     <a href="{% url 'add_medication' %}" class="btn btn-primary">Dodaj nowy lek</a>
   </div>
 
   {% if medications %}
-    <!-- Przyciski sterujące + eksport -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
         <button id="clear-filters" class="btn btn-secondary me-2">Wyczyść filtry</button>
@@ -22,7 +20,6 @@
       </form>
     </div>
 
-    <!-- Panel filtrów -->
     <div id="filter-box" class="card p-3 mb-4" style="display: none;">
       <strong>Filtruj dane:</strong>
       <div class="row mt-2">
@@ -38,7 +35,6 @@
       </div>
     </div>
 
-    <!-- Tabela leków -->
     <div class="table-responsive">
       <table id="medications-table" class="table table-bordered table-hover align-middle bg-white shadow-sm">
         <thead class="table-light">
@@ -57,7 +53,6 @@
           <tr>
             <td>
               {{ med.name }}
-              {# IKONKI: kolejność ważności — out ma pierwszeństwo nad low #}
               {% if med.is_out %}
                 <i class="bi bi-exclamation-octagon-fill text-danger ms-1" title="Skończył się (0%)"></i>
               {% elif med.is_running_low %}
@@ -114,9 +109,7 @@
   {% endif %}
 </div>
 
-<!-- DataTables + Bootstrap CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<!-- jQuery + DataTables Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -143,7 +136,7 @@ $(function() {
       "processing": "Przetwarzanie..."
     },
     dom: 'lrtip',
-    order: [],          // NIE sortuj automatycznie – zachowaj kolejność z widoku
+    order: [],
     pageLength: 10
   });
 

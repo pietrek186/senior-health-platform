@@ -38,15 +38,12 @@
           </td>
         </tr>
         {% endfor %}
-        {# UWAGA: nie wstawiamy wiersza z colspan — DataTables samo pokaże emptyTable #}
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- jQuery (jeśli nie masz globalnie w base.html) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- DataTables -->
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
@@ -54,10 +51,10 @@
 <script>
   $(document).ready(function () {
     $('#remindersTable').DataTable({
-      order: [],          // zachowaj kolejność z serwera
-      searching: false,   // bez paska wyszukiwania
+      order: [],
+      searching: false,
       language: {
-        emptyTable: "Brak przypomnień",               // <-- to pokaże się, gdy tabela pusta
+        emptyTable: "Brak przypomnień",
         lengthMenu: "Pokaż _MENU_ wpisów na stronę",
         zeroRecords: "Brak wyników",
         info: "Strona _PAGE_ z _PAGES_",

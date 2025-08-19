@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from medications.models import Medication
 from django.conf import settings
-from datetime import timedelta
 
 class Command(BaseCommand):
     help = 'Sprawdza stan leków i wysyła powiadomienia, jeśli coś się kończy lub zaraz się przeterminuje'
@@ -16,19 +15,16 @@ class Command(BaseCommand):
             user = med.user
             warnings = []
 
-            # Sprawdzenie: czy lek się kończy
             if med.is_running_low():
                 warnings.append(f"- Lek **{med.name}** kończy się (pozostało mniej niż 30%)")
 
-            # Sprawdzenie: czy zaraz się przeterminuje
             if med.expiration_date:
                 days_left = (med.expiration_date - today).days
                 if days_left <= 7:
                     warnings.append(f"- Lek **{med.name}** ma ważność tylko do {med.expiration_date} (za {days_left} dni)")
 
-            # Jeśli są ostrzeżenia – wysyłamy e-mail
             if warnings:
-                subject = "Powiadomienie z apteczki – ważne informacje o lekach"
+                subject = "Powiadomienie z apteczki - ważne informacje o lekach"
                 body = (
                     f"Dzień dobry {user.first_name},\n\n"
                     f"Z Twojej apteczki wynika, że:\n\n"

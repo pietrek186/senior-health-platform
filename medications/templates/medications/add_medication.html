@@ -6,7 +6,7 @@
   .form-container{
     max-width:700px;
     margin:0 auto;
-    background-color:#f0f8ff; /* lekko niebieskie tło jak w ciśnieniu */
+    background-color:#f0f8ff;
     padding:24px;
     border-radius:12px;
     box-shadow:0 4px 12px rgba(0,0,0,0.1);
@@ -33,17 +33,14 @@
     <form method="post">
       {% csrf_token %}
 
-      <!-- Nazwa -->
       <div class="form-row">
         <div class="form-label-col">Nazwa leku</div>
         <div class="form-input-col">{{ form.name }}</div>
       </div>
 
-      <!-- Syrop? (przełącznik) + ukryte pole 'form' -->
       <div class="form-row">
         <div class="form-label-col">Syrop?</div>
         <div class="form-input-col">
-          <!-- ukryte pole modelowe: tablet/syrup -->
           <span style="display:none;">{{ form.form }}</span>
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="isSyrupSwitch">
@@ -51,7 +48,6 @@
         </div>
       </div>
 
-      <!-- Tabletki -->
       <div id="tablet-fields">
         <div class="form-row">
           <div class="form-label-col">Ilość tabletek w opakowaniu</div>
@@ -63,7 +59,6 @@
         </div>
       </div>
 
-      <!-- Syrop -->
       <div id="syrup-fields" style="display:none;">
         <div class="form-row">
           <div class="form-label-col">Objętość syropu (ml)</div>
@@ -75,7 +70,6 @@
         </div>
       </div>
 
-      <!-- Wspólne -->
       <div class="form-row">
         <div class="form-label-col">Częstotliwość dawkowania (na dobę)</div>
         <div class="form-input-col">{{ form.frequency }}</div>
@@ -100,7 +94,6 @@
         <div class="form-input-col">{{ form.expiration_date }}</div>
       </div>
 
-      <!-- Przyciski -->
       <div class="text-center mt-3 d-flex justify-content-center gap-2">
         <button type="submit" class="btn btn-dark">Zapisz</button>
         <a href="{% url 'medication_list' %}" class="btn btn-secondary">Anuluj</a>
@@ -110,11 +103,10 @@
 </div>
 
 <script>
-  // Pokazuj odpowiednie pola zależnie od przełącznika syrop/tabletki
   const syrupSwitch = document.getElementById('isSyrupSwitch');
   const syrupFields = document.getElementById('syrup-fields');
   const tabletFields = document.getElementById('tablet-fields');
-  const formField = document.querySelector('input[name="form"]'); // ukryte pole
+  const formField = document.querySelector('input[name="form"]');
 
   function toggleFields() {
     const isSyrup = syrupSwitch.checked;
@@ -124,7 +116,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // ustawienie stanu startowego na podstawie wartości ukrytego pola (z initial w widoku)
     const current = formField ? (formField.value || '').toLowerCase() : '';
     syrupSwitch.checked = (current === 'syrup' || current === 'syrop');
     toggleFields();

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "reminders",
     "accounts",
     "records",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [

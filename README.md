@@ -182,3 +182,12 @@ python manage.py runserver
 ```bash
 http://127.0.0.1:8000/
 ```
+
+## Medical Disclaimer
+
+This application is intended for educational and demonstration purposes only and does not provide medical advice.
+
+The information presented by the system (including measurements, charts, alerts, and recommendations) should not be considered a substitute for professional medical diagnosis, treatment, or advice.
+
+Users should always consult qualified healthcare professionals regarding any medical conditions or decisions. The authors of this project assume no responsibility for improper use of the application or misinterpretation of the displayed data.
+

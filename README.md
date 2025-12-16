@@ -125,3 +125,60 @@ and are not included in this repository.
 ### SOS – SMS alert
 ![SOS SMS alert](screenshots/sos_sms_alert.png.jpg)
 
+## Installation & Local Setup
+
+The project was developed as part of an MSc thesis and is intended primarily for demonstration and educational purposes.
+Below are the steps required to run the application locally in a development environment.
+
+### Requirements
+- Python 3.10+
+- pip
+- virtualenv (recommended)
+- SQLite (default) or PostgreSQL
+
+### Local setup
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/pietrek186/senior-health-platform.git
+cd senior-health-platform
+```
+
+2. Create and activate a virtual environment:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux / macOS
+venv\Scripts\activate     # Windows
+```
+
+3. Install required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Apply database migrations:
+
+```bash
+python manage.py migrate
+```
+
+6. Create a superuser (optional, for admin panel access):
+
+```bash
+python manage.py createsuperuser
+```
+
+7. Run the development server:
+
+```bash
+python manage.py runserver
+```
+
+8. Open the application in your browser:
+
+```bash
+http://127.0.0.1:8000/
+```

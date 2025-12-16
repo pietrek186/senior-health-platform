@@ -98,3 +98,30 @@ The repository is published for **portfolio and educational purposes**.
 Sensitive configuration data such as secret keys, email credentials,
 and environment-specific settings are stored in environment variables
 and are not included in this repository.
+
+## Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### BMI Calculator
+![BMI Calculator](screenshots/bmi.png)
+
+### Glucose – trend chart
+![Glucose chart](screenshots/glucose_chart.png)
+
+### Blood Pressure – results table
+![Blood pressure table](screenshots/pressure_table.png)
+
+### Medication cabinet
+![Medication cabinet](screenshots/medications.png)
+
+### Email notification (low stock / expiring medication)
+![Email medication alert](screenshots/email_medication_alert.png)
+
+### Nearby clinics map
+![Clinics map](screenshots/clinic_map.png)
+
+### SOS – SMS alert
+![SOS SMS alert](screenshots/sos_sms_alert.png.jpg)
+
